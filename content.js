@@ -8,6 +8,7 @@ let currentRowIndex = null;
 let panelEl = null;
 let lastThreads = [];
 let pendingChanges = {};
+let autoSaveTimer = null;
 
 // ── Column definitions (matches your sheet exactly) ───────────────────────────
 const COLUMNS = [
@@ -214,7 +215,7 @@ function renderFields(rowData) {
       }
       input.addEventListener('change', () => {
         pendingChanges[col.col] = input.value;
-        showSaveBar();
+        triggerAutoSave();
         updateSaveButtonState();
       });
     } else {
@@ -225,7 +226,7 @@ function renderFields(rowData) {
       input.style.fontSize = '12px';
       input.addEventListener('input', () => {
         pendingChanges[col.col] = input.value;
-        showSaveBar();
+        triggerAutoSave();
         updateSaveButtonState();
       });
     }
@@ -261,7 +262,7 @@ function renderFields(rowData) {
     textarea.style.fontSize = '12px';
     textarea.addEventListener('input', () => {
       pendingChanges[noteCol.col] = textarea.value;
-      showSaveBar();
+      triggerAutoSave();
       updateSaveButtonState();
     });
 
@@ -270,38 +271,12 @@ function renderFields(rowData) {
     fieldsEl.appendChild(notesWrapper);
   }
 
-  // Save button handler (in header)
+  // Save button handler (in header) - manual save
   const saveBtn = document.getElementById('crm-save-btn-header');
   if (saveBtn) {
-    saveBtn.onclick = async () => {
-      if (!currentRowIndex || Object.keys(pendingChanges).length === 0) return;
-      saveBtn.disabled = true;
-      saveBtn.textContent = 'Saving...';
-      saveBtn.style.backgroundColor = '#666';
-
-      // Always update last contact date (col B) on save
-      const today = new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
-      pendingChanges['B'] = pendingChanges['B'] || today;
-
-      chrome.runtime.sendMessage(
-        { type: 'UPDATE_ROW', rowIndex: currentRowIndex, updates: pendingChanges },
-        (res) => {
-          const status = document.getElementById('crm-save-status-header');
-          if (res?.success) {
-            saveBtn.textContent = 'Saved ✓';
-            saveBtn.style.backgroundColor = '#28a745';
-            saveBtn.disabled = true;
-            if (status) status.textContent = '';
-            // Clear pending
-            Object.keys(pendingChanges).forEach(k => delete pendingChanges[k]);
-            setTimeout(() => { saveBtn.textContent = 'Save'; saveBtn.style.backgroundColor = ''; hideSaveBar(); }, 2000);
-          } else {
-            saveBtn.textContent = 'Error ✗';
-            saveBtn.style.backgroundColor = '#dc3545';
-            if (status) status.textContent = res?.error || 'Save failed';
-          }
-        }
-      );
+    saveBtn.onclick = () => {
+      if (autoSaveTimer) clearTimeout(autoSaveTimer);
+      performSave();
     };
   }
 }
@@ -336,6 +311,55 @@ function updateSaveButtonState() {
     saveBtn.style.backgroundColor = '#999';
     saveBtn.style.opacity = '0.6';
   }
+}
+
+function triggerAutoSave() {
+  // Clear any existing timer
+  if (autoSaveTimer) clearTimeout(autoSaveTimer);
+
+  // Show save bar
+  showSaveBar();
+
+  // Wait 1 second before auto-saving (to batch rapid changes)
+  autoSaveTimer = setTimeout(() => {
+    performSave();
+  }, 1000);
+}
+
+function performSave() {
+  const saveBtn = document.getElementById('crm-save-btn-header');
+  if (!saveBtn || !currentRowIndex || Object.keys(pendingChanges).length === 0) return;
+
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving...';
+  saveBtn.style.backgroundColor = '#666';
+
+  // Always update last contact date (col B) on save
+  const today = new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+  pendingChanges['B'] = pendingChanges['B'] || today;
+
+  chrome.runtime.sendMessage(
+    { type: 'UPDATE_ROW', rowIndex: currentRowIndex, updates: pendingChanges },
+    (res) => {
+      const status = document.getElementById('crm-save-status-header');
+      if (res?.success) {
+        saveBtn.textContent = 'Saved ✓';
+        saveBtn.style.backgroundColor = '#28a745';
+        if (status) status.textContent = '';
+        // Clear pending
+        Object.keys(pendingChanges).forEach(k => delete pendingChanges[k]);
+        setTimeout(() => {
+          saveBtn.textContent = 'Save';
+          saveBtn.style.backgroundColor = '';
+          hideSaveBar();
+        }, 2000);
+      } else {
+        saveBtn.textContent = 'Error ✗';
+        saveBtn.style.backgroundColor = '#dc3545';
+        if (status) status.textContent = res?.error || 'Save failed';
+      }
+    }
+  );
 }
 
 // ── Look up current thread in sheet ──────────────────────────────────────────
