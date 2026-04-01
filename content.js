@@ -68,6 +68,16 @@ function getCurrentThreadName() {
     if (span) return span.innerText?.trim();
   }
 
+  // Last fallback: parse from aria-label if present
+  const conv = document.querySelector('[aria-label^="Conversation titled"]');
+  if (conv) {
+    const label = conv.getAttribute('aria-label');
+    if (label) {
+      const text = label.replace('Conversation titled ', '').trim();
+      if (text) return text;
+    }
+  }
+
   return null;
 }
 
@@ -256,6 +266,8 @@ function lookupCurrentThread() {
   const threadName = getCurrentThreadName();
   if (!threadName) {
     setStatus('No thread name found');
+    // Retry after a short delay in case DOM isn't ready
+    setTimeout(() => lookupCurrentThread(), 500);
     return;
   }
 
@@ -277,6 +289,8 @@ function lookupCurrentThread() {
       } else {
         setStatus('No match');
         showNoMatch();
+        // Retry after a delay in case sheet data wasn't loaded yet
+        setTimeout(() => lookupCurrentThread(), 1000);
       }
     }
   );
