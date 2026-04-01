@@ -428,9 +428,7 @@ function lookupCurrentThread() {
           showFields(rowData);
         }
       } else {
-        setStatus('No match');
-        showDebug(`✗ No row found for "${customer}" + "${vehicle}"`);
-        showNoMatch();
+        showNoRowFound();
         // Retry after a delay in case sheet data wasn't loaded yet
         setTimeout(() => lookupCurrentThread(), 1000);
       }
@@ -494,6 +492,22 @@ function showError() {
   if (debug) debug.style.display = 'none';
   if (errorInline) {
     errorInline.textContent = 'error: multiple matches';
+    errorInline.style.display = 'inline';
+  }
+}
+
+function showNoRowFound() {
+  const loading = document.getElementById('crm-loading');
+  const fields = document.getElementById('crm-fields');
+  const noMatch = document.getElementById('crm-no-match');
+  const debug = document.getElementById('crm-debug');
+  const errorInline = document.getElementById('crm-error-inline');
+  if (loading) loading.style.display = 'none';
+  if (fields) fields.style.display = 'none';
+  if (noMatch) noMatch.style.display = 'none';
+  if (debug) debug.style.display = 'none';
+  if (errorInline) {
+    errorInline.textContent = 'no row found';
     errorInline.style.display = 'inline';
   }
 }
