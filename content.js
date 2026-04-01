@@ -156,7 +156,7 @@ function renderFields(rowData) {
   fieldsEl.innerHTML = '';
   fieldsEl.style.display = 'flex';
   fieldsEl.style.flexDirection = 'column';
-  fieldsEl.style.gap = '12px';
+  fieldsEl.style.gap = '8px';
   pendingChanges = {};
 
   // Fields to exclude: Handler (A), Source (E), Customer (F), Vehicle (H)
@@ -171,7 +171,7 @@ function renderFields(rowData) {
   const mainRow = document.createElement('div');
   mainRow.style.display = 'grid';
   mainRow.style.gridTemplateColumns = 'repeat(auto-fit, minmax(90px, 1fr))';
-  mainRow.style.gap = '8px';
+  mainRow.style.gap = '6px';
 
   mainCols.forEach((col, i) => {
     const colIndex = COLUMNS.indexOf(col);
@@ -180,12 +180,14 @@ function renderFields(rowData) {
     const fieldWrapper = document.createElement('div');
     fieldWrapper.style.display = 'flex';
     fieldWrapper.style.flexDirection = 'column';
-    fieldWrapper.style.gap = '4px';
+    fieldWrapper.style.gap = '2px';
 
     const label = document.createElement('label');
     label.className = 'crm-label';
-    label.style.fontSize = '11px';
+    label.style.fontSize = '10px';
     label.style.fontWeight = 'bold';
+    label.style.lineHeight = '1';
+    label.style.marginBottom = '2px';
     label.textContent = col.label;
 
     let input;
@@ -246,12 +248,14 @@ function renderFields(rowData) {
     const notesWrapper = document.createElement('div');
     notesWrapper.style.display = 'flex';
     notesWrapper.style.flexDirection = 'column';
-    notesWrapper.style.gap = '4px';
+    notesWrapper.style.gap = '2px';
 
     const label = document.createElement('label');
     label.className = 'crm-label';
-    label.style.fontSize = '11px';
+    label.style.fontSize = '10px';
     label.style.fontWeight = 'bold';
+    label.style.lineHeight = '1';
+    label.style.marginBottom = '2px';
     label.textContent = noteCol.label;
 
     const textarea = document.createElement('textarea');
