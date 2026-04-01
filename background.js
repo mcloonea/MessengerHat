@@ -181,30 +181,28 @@ async function updateRow(rowIndex, updates) {
     console.log('[CRM] updateRow called with:', { rowIndex, updates });
     const token = await getAccessToken();
 
-    // Build the range and values for the update
-    // updates is { 'B': 'value', 'D': 'value', etc }
-    const updateRange = `${SHEET_NAME}!${Object.keys(updates)[0]}${rowIndex}:${Object.keys(updates)[Object.keys(updates).length - 1]}${rowIndex}`;
-
-    const values = [];
+    // Update each column individually to avoid any mapping issues
     for (const col in updates) {
-      values.push(updates[col]);
-    }
+      const value = updates[col];
+      const range = `${SHEET_NAME}!${col}${rowIndex}`;
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?valueInputOption=RAW`;
 
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${updateRange}?valueInputOption=RAW`;
+      const res = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ values: [[value]] })
+      });
 
-    const res = await fetch(url, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ values: [values] })
-    });
+      if (!res.ok) {
+        const err = await res.json();
+        console.error(`[CRM] Failed to update ${col}${rowIndex}:`, err);
+        throw new Error(`Failed to update ${col}: ${err.error?.message || 'Unknown error'}`);
+      }
 
-    if (!res.ok) {
-      const err = await res.json();
-      console.error('[CRM] Sheet update error:', err);
-      throw new Error(`Failed to update sheet: ${err.error?.message || 'Unknown error'}`);
+      console.log(`[CRM] Updated ${col}${rowIndex}`);
     }
 
     console.log('[CRM] Row updated successfully');
