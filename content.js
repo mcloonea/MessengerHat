@@ -182,7 +182,15 @@ function renderFields(rowData) {
     fieldWrapper.style.display = 'flex';
     fieldWrapper.style.flexDirection = 'column';
     fieldWrapper.style.gap = '2px';
-    fieldWrapper.style.flex = '1 1 auto';
+    fieldWrapper.style.minWidth = '0';
+    // Proportional flex: Stage (3x), VIN (2x), others (1x)
+    if (col.key === 'stage') {
+      fieldWrapper.style.flex = '3 1 0';
+    } else if (col.key === 'vin') {
+      fieldWrapper.style.flex = '2 1 0';
+    } else {
+      fieldWrapper.style.flex = '1 1 0';
+    }
 
     const label = document.createElement('label');
     label.className = 'crm-label';
@@ -203,8 +211,8 @@ function renderFields(rowData) {
       input = document.createElement('select');
       input.className = 'crm-input crm-select';
       input.style.fontSize = '12px';
-      input.style.width = 'fit-content';
-      input.style.padding = '2px 1px';
+      input.style.width = '100%';
+      input.style.padding = '2px 4px';
       input.style.textAlign = 'center';
       col.options.forEach(opt => {
         const o = document.createElement('option');
@@ -231,7 +239,7 @@ function renderFields(rowData) {
       input.value = value;
       input.style.width = '100%';
       input.style.fontSize = '12px';
-      input.style.padding = '2px 1px';
+      input.style.padding = '2px 4px';
       input.style.resize = 'vertical';
       input.style.overflowWrap = 'break-word';
       input.style.wordWrap = 'break-word';
@@ -248,26 +256,6 @@ function renderFields(rowData) {
         updateSaveButtonState();
       });
       setTimeout(adjustHeight, 0);
-    } else if (col.key === 'vin') {
-      input = document.createElement('input');
-      input.type = 'text';
-      input.className = 'crm-input';
-      input.value = value;
-      input.style.fontSize = '12px';
-      input.style.padding = '2px 1px';
-      input.style.textAlign = 'center';
-      const adjustWidth = () => {
-        const minWidth = 60;
-        const charWidth = 7;
-        input.style.width = Math.max(value.length * charWidth, minWidth) + 'px';
-      };
-      input.addEventListener('input', () => {
-        pendingChanges[col.col] = input.value;
-        adjustWidth();
-        triggerAutoSave();
-        updateSaveButtonState();
-      });
-      adjustWidth();
     } else {
       input = document.createElement('input');
       input.type = 'text';
@@ -277,7 +265,7 @@ function renderFields(rowData) {
       input.style.overflow = 'hidden';
       input.style.textOverflow = 'ellipsis';
       input.style.width = '100%';
-      input.style.padding = '2px 1px';
+      input.style.padding = '2px 4px';
       input.style.textAlign = 'center';
       input.addEventListener('input', () => {
         pendingChanges[col.col] = input.value;
@@ -317,7 +305,7 @@ function renderFields(rowData) {
     textarea.rows = 1;
     textarea.style.width = '100%';
     textarea.style.fontSize = '12px';
-    textarea.style.padding = '2px 1px';
+    textarea.style.padding = '2px 4px';
     textarea.style.resize = 'vertical';
     textarea.style.overflowWrap = 'break-word';
     textarea.style.wordWrap = 'break-word';
