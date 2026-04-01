@@ -6,6 +6,7 @@ const API_KEY = 'AIzaSyBwKqCp1ZDl8uIJlpz_VrWzZRPK1fJ8b08';
 
 // Find row by Customer (col F) and Vehicle (col H)
 async function findRow(customerName, vehicleName) {
+  let rows = [];
   try {
     console.log('[CRM] findRow called with:', { customerName, vehicleName });
     const range = `${SHEET_NAME}!A:O`;
@@ -20,7 +21,7 @@ async function findRow(customerName, vehicleName) {
       console.error('[CRM] Sheet API error:', data);
       return null;
     }
-    const rows = data.values || [];
+    rows = data.values || [];
     console.log('[CRM] Found', rows.length, 'rows in sheet');
   } catch (err) {
     console.error('[CRM] findRow error:', err);
@@ -36,23 +37,20 @@ async function findRow(customerName, vehicleName) {
     const nameMatch = customerName.trim().toLowerCase();
     const vehicleMatch = vehicleName.trim().toLowerCase();
 
-    // Check if customer name matches (exact or first name only)
-    const customerMatches = customer === nameMatch || customer.startsWith(nameMatch + ' ');
+    // Check if customer name is contained in sheet value (handles first/last name)
+    const customerMatches = customer.includes(nameMatch);
+
+    // Check if vehicle is contained in sheet value (handles partial matches)
+    const vehicleMatches = vehicleMatch === '' || vehicle.includes(vehicleMatch);
 
     if (i < 5) {
-      console.log(`[CRM] Row ${i}: customer="${customer}" vs "${nameMatch}", vehicle="${vehicle}" vs "${vehicleMatch}"`);
+      console.log(`[CRM] Row ${i}: customer="${customer}" contains "${nameMatch}"? ${customerMatches}, vehicle="${vehicle}" contains "${vehicleMatch}"? ${vehicleMatches}`);
     }
 
-    // Dual match: customer name AND vehicle
-    if (customerMatches && vehicle === vehicleMatch) {
+    // Match: customer name AND vehicle
+    if (customerMatches && vehicleMatches) {
       console.log(`[CRM] MATCH found at row ${i + 1}`);
       return { rowIndex: i + 1, rowData: row }; // +1 because sheets is 1-indexed
-    }
-
-    // Fallback: just customer name if vehicle is empty or partial
-    if (customerMatches && vehicleMatch === '') {
-      console.log(`[CRM] MATCH (name only) found at row ${i + 1}`);
-      return { rowIndex: i + 1, rowData: row };
     }
   }
   console.log('[CRM] No matching row found');
