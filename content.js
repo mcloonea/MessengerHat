@@ -16,7 +16,7 @@ const COLUMNS = [
   { key: 'last',      col: 'B', label: 'Last Contact', editable: true, type: 'text' },
   { key: 'notes',     col: 'C', label: 'Notes',       editable: true, type: 'textarea' },
   { key: 'stage',     col: 'D', label: 'Stage',       editable: true, type: 'select',
-    options: ['Hot', 'Warm', 'Cold', 'Appt Set', 'Appt Done', 'Pickup', 'Purchased', 'Dead - Sold', 'Dead - Listing Removed', 'Dead - Other'] },
+    options: ['Collecting Info', 'Require Review', 'Require Kevin Review', 'Reviewed', 'Working', 'Hot', 'Purchased', 'Dead - History', 'Dead - Sold', 'Dead - Other', 'Cold', 'Dead - Listing Removal'] },
   { key: 'source',    col: 'E', label: 'Source',      editable: false },
   { key: 'customer',  col: 'F', label: 'Customer',    editable: false },
   { key: 'mileage',   col: 'G', label: 'Mileage',     editable: true, type: 'text' },
