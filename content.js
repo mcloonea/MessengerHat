@@ -278,19 +278,19 @@ function renderFields(rowData) {
     textarea.style.overflowWrap = 'break-word';
     textarea.style.wordWrap = 'break-word';
     textarea.style.overflow = 'hidden';
+    const adjustHeight = () => {
+      textarea.style.height = 'auto';
+      const newHeight = Math.max(textarea.scrollHeight, 30); // min 30px to match top row
+      textarea.style.height = Math.min(newHeight, 200) + 'px';
+    };
     textarea.addEventListener('input', () => {
       pendingChanges[noteCol.col] = textarea.value;
-      // Auto-expand height based on content
-      textarea.style.height = 'auto';
-      textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
+      adjustHeight();
       triggerAutoSave();
       updateSaveButtonState();
     });
     // Initial height adjustment
-    setTimeout(() => {
-      textarea.style.height = 'auto';
-      textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
-    }, 0);
+    setTimeout(adjustHeight, 0);
 
     notesWrapper.appendChild(label);
     notesWrapper.appendChild(textarea);
