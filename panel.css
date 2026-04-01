@@ -142,7 +142,6 @@
   padding: 3px 4px;
   outline: none;
   font-family: inherit;
-  width: 100%;
   box-sizing: border-box;
 }
 
@@ -154,6 +153,7 @@
 .crm-textarea {
   resize: vertical;
   min-height: 52px;
+  width: 100%;
 }
 
 .crm-select {
