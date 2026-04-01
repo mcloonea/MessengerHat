@@ -182,9 +182,8 @@ function renderFields(rowData) {
     fieldWrapper.style.display = 'flex';
     fieldWrapper.style.flexDirection = 'column';
     fieldWrapper.style.gap = '2px';
-    fieldWrapper.style.flex = '1 1 auto';
-    fieldWrapper.style.minWidth = '0'; // Allow shrinking below content size
-    fieldWrapper.style.overflow = 'hidden';
+    fieldWrapper.style.flex = '0 0 auto';
+    fieldWrapper.style.minWidth = '0';
 
     const label = document.createElement('label');
     label.className = 'crm-label';
@@ -205,6 +204,8 @@ function renderFields(rowData) {
       input = document.createElement('select');
       input.className = 'crm-input crm-select';
       input.style.fontSize = '12px';
+      input.style.width = 'auto';
+      input.style.minWidth = '80px';
       col.options.forEach(opt => {
         const o = document.createElement('option');
         o.value = opt;
@@ -232,6 +233,8 @@ function renderFields(rowData) {
       input.style.fontSize = '12px';
       input.style.overflow = 'hidden';
       input.style.textOverflow = 'ellipsis';
+      input.style.width = 'auto';
+      input.style.minWidth = '60px';
       input.addEventListener('input', () => {
         pendingChanges[col.col] = input.value;
         triggerAutoSave();
