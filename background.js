@@ -29,6 +29,7 @@ async function findRow(customerName, vehicleName) {
   }
 
   // Skip header row and date rows (rows where col A looks like a date)
+  const matches = [];
   for (let i = 1; i < rows.length; i++) {
     const row = rows[i];
     const customer = (row[5] || '').trim().toLowerCase();
@@ -49,10 +50,20 @@ async function findRow(customerName, vehicleName) {
 
     // Match: customer name AND vehicle
     if (customerMatches && vehicleMatches) {
-      console.log(`[CRM] MATCH found at row ${i + 1}`);
-      return { rowIndex: i + 1, rowData: row }; // +1 because sheets is 1-indexed
+      matches.push({ rowIndex: i + 1, rowData: row });
     }
   }
+
+  if (matches.length > 1) {
+    console.error(`[CRM] ERROR: Found ${matches.length} matching rows. Matches at rows: ${matches.map(m => m.rowIndex).join(', ')}`);
+    return { error: `Found ${matches.length} matching rows. Cannot determine which lead. Check rows: ${matches.map(m => m.rowIndex).join(', ')}` };
+  }
+
+  if (matches.length === 1) {
+    console.log(`[CRM] MATCH found at row ${matches[0].rowIndex}`);
+    return { rowIndex: matches[0].rowIndex, rowData: matches[0].rowData };
+  }
+
   console.log('[CRM] No matching row found');
   return null;
 }

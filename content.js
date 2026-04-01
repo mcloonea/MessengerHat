@@ -110,6 +110,8 @@ function injectPanel() {
       <button class="crm-toggle" id="crm-toggle">▲</button>
     </div>
     <div class="crm-body" id="crm-body">
+      <div class="crm-debug" id="crm-debug" style="background:#f0f0f0;padding:8px;margin-bottom:8px;font-size:11px;border-left:3px solid #0066cc;display:none"></div>
+      <div class="crm-error" id="crm-error" style="background:#fee;padding:8px;margin-bottom:8px;color:#c00;border-left:3px solid #c00;display:none"></div>
       <div class="crm-loading" id="crm-loading">Looking up lead...</div>
       <div class="crm-fields" id="crm-fields" style="display:none"></div>
       <div class="crm-no-match" id="crm-no-match" style="display:none">
@@ -273,21 +275,31 @@ function lookupCurrentThread() {
 
   const { customer, vehicle } = parseThreadName(threadName);
   setStatus(`Looking up: ${customer}`);
+  showDebug(`🔍 Searching: "${customer}" + "${vehicle}"`);
 
   chrome.runtime.sendMessage(
     { type: 'FIND_ROW', customerName: customer, vehicleName: vehicle },
     (res) => {
       if (res?.success && res.result) {
-        currentRowIndex = res.result.rowIndex;
-        const rowData = res.result.rowData;
+        if (res.result.error) {
+          // Multiple matches found
+          setStatus('ERROR: Multiple matches');
+          showDebug(`❌ ${res.result.error}`);
+          showError(res.result.error);
+        } else {
+          currentRowIndex = res.result.rowIndex;
+          const rowData = res.result.rowData;
 
-        // Pad to 15 columns
-        while (rowData.length < 15) rowData.push('');
+          // Pad to 15 columns
+          while (rowData.length < 15) rowData.push('');
 
-        setStatus(`Row ${currentRowIndex} · ${rowData[3] || 'No Stage'}`);
-        showFields(rowData);
+          setStatus(`Row ${currentRowIndex} · ${rowData[3] || 'No Stage'}`);
+          showDebug(`✓ Found Row ${currentRowIndex}`);
+          showFields(rowData);
+        }
       } else {
         setStatus('No match');
+        showDebug(`✗ No row found for "${customer}" + "${vehicle}"`);
         showNoMatch();
         // Retry after a delay in case sheet data wasn't loaded yet
         setTimeout(() => lookupCurrentThread(), 1000);
@@ -305,8 +317,10 @@ function showFields(rowData) {
   const loading = document.getElementById('crm-loading');
   const fields = document.getElementById('crm-fields');
   const noMatch = document.getElementById('crm-no-match');
+  const error = document.getElementById('crm-error');
   if (loading) loading.style.display = 'none';
   if (noMatch) noMatch.style.display = 'none';
+  if (error) error.style.display = 'none';
   if (fields) {
     fields.style.display = 'grid';
     renderFields(rowData);
@@ -320,6 +334,33 @@ function showNoMatch() {
   if (loading) loading.style.display = 'none';
   if (fields) fields.style.display = 'none';
   if (noMatch) noMatch.style.display = 'flex';
+}
+
+function showDebug(text) {
+  const debug = document.getElementById('crm-debug');
+  if (debug) {
+    debug.textContent = text;
+    debug.style.display = 'block';
+  }
+}
+
+function hideDebug() {
+  const debug = document.getElementById('crm-debug');
+  if (debug) debug.style.display = 'none';
+}
+
+function showError(text) {
+  const error = document.getElementById('crm-error');
+  const loading = document.getElementById('crm-loading');
+  const fields = document.getElementById('crm-fields');
+  const noMatch = document.getElementById('crm-no-match');
+  if (loading) loading.style.display = 'none';
+  if (fields) fields.style.display = 'none';
+  if (noMatch) noMatch.style.display = 'none';
+  if (error) {
+    error.textContent = text;
+    error.style.display = 'block';
+  }
 }
 
 // ── Thread list scanner (for inbound detection) ───────────────────────────────
