@@ -150,13 +150,34 @@ function renderFields(rowData) {
   fieldsEl.innerHTML = '';
   const pendingChanges = {};
 
-  COLUMNS.forEach((col, i) => {
-    const value = (rowData[i] || '').toString().trim();
-    const row = document.createElement('div');
-    row.className = 'crm-field-row';
+  // Fields to exclude: Handler (A), Source (E), Customer (F), Vehicle (H)
+  const excludeKeys = ['handler', 'source', 'customer', 'vehicle'];
+  const displayCols = COLUMNS.filter(col => !excludeKeys.includes(col.key));
+
+  // Separate notes from other fields
+  const noteCol = displayCols.find(col => col.key === 'notes');
+  const mainCols = displayCols.filter(col => col.key !== 'notes');
+
+  // Render main fields in a horizontal grid
+  const mainRow = document.createElement('div');
+  mainRow.style.display = 'grid';
+  mainRow.style.gridTemplateColumns = 'repeat(auto-fit, minmax(100px, 1fr))';
+  mainRow.style.gap = '8px';
+  mainRow.style.marginBottom = '8px';
+
+  mainCols.forEach((col, i) => {
+    const colIndex = COLUMNS.indexOf(col);
+    const value = (rowData[colIndex] || '').toString().trim();
+
+    const fieldWrapper = document.createElement('div');
+    fieldWrapper.style.display = 'flex';
+    fieldWrapper.style.flexDirection = 'column';
+    fieldWrapper.style.gap = '4px';
 
     const label = document.createElement('label');
     label.className = 'crm-label';
+    label.style.fontSize = '11px';
+    label.style.fontWeight = 'bold';
     label.textContent = col.label;
 
     let input;
@@ -165,18 +186,11 @@ function renderFields(rowData) {
       input = document.createElement('span');
       input.className = 'crm-value-static';
       input.textContent = value || '—';
-    } else if (col.type === 'textarea') {
-      input = document.createElement('textarea');
-      input.className = 'crm-input crm-textarea';
-      input.value = value;
-      input.rows = 3;
-      input.addEventListener('input', () => {
-        pendingChanges[col.col] = input.value;
-        showSaveBar();
-      });
+      input.style.fontSize = '12px';
     } else if (col.type === 'select') {
       input = document.createElement('select');
       input.className = 'crm-input crm-select';
+      input.style.fontSize = '12px';
       col.options.forEach(opt => {
         const o = document.createElement('option');
         o.value = opt;
@@ -184,7 +198,6 @@ function renderFields(rowData) {
         if (opt === value) o.selected = true;
         input.appendChild(o);
       });
-      // If current value isn't in options, add it
       if (value && !col.options.includes(value)) {
         const o = document.createElement('option');
         o.value = value;
@@ -201,16 +214,51 @@ function renderFields(rowData) {
       input.type = 'text';
       input.className = 'crm-input';
       input.value = value;
+      input.style.fontSize = '12px';
       input.addEventListener('input', () => {
         pendingChanges[col.col] = input.value;
         showSaveBar();
       });
     }
 
-    row.appendChild(label);
-    row.appendChild(input);
-    fieldsEl.appendChild(row);
+    fieldWrapper.appendChild(label);
+    fieldWrapper.appendChild(input);
+    mainRow.appendChild(fieldWrapper);
   });
+
+  fieldsEl.appendChild(mainRow);
+
+  // Render notes field full width below
+  if (noteCol) {
+    const colIndex = COLUMNS.indexOf(noteCol);
+    const value = (rowData[colIndex] || '').toString().trim();
+
+    const notesWrapper = document.createElement('div');
+    notesWrapper.style.display = 'flex';
+    notesWrapper.style.flexDirection = 'column';
+    notesWrapper.style.gap = '4px';
+
+    const label = document.createElement('label');
+    label.className = 'crm-label';
+    label.style.fontSize = '11px';
+    label.style.fontWeight = 'bold';
+    label.textContent = noteCol.label;
+
+    const textarea = document.createElement('textarea');
+    textarea.className = 'crm-input crm-textarea';
+    textarea.value = value;
+    textarea.rows = 3;
+    textarea.style.width = '100%';
+    textarea.style.fontSize = '12px';
+    textarea.addEventListener('input', () => {
+      pendingChanges[noteCol.col] = textarea.value;
+      showSaveBar();
+    });
+
+    notesWrapper.appendChild(label);
+    notesWrapper.appendChild(textarea);
+    fieldsEl.appendChild(notesWrapper);
+  }
 
   // Save button handler
   const saveBtn = document.getElementById('crm-save-btn');
