@@ -167,10 +167,10 @@ function renderFields(rowData) {
   const noteCol = displayCols.find(col => col.key === 'notes');
   const mainCols = displayCols.filter(col => col.key !== 'notes');
 
-  // Render main fields in a flexible grid
+  // Render main fields in a flexible grid - size to content
   const mainRow = document.createElement('div');
   mainRow.style.display = 'grid';
-  mainRow.style.gridTemplateColumns = 'repeat(auto-fit, minmax(50px, 1fr))';
+  mainRow.style.gridTemplateColumns = 'repeat(auto-fit, minmax(50px, auto))';
   mainRow.style.gap = '4px';
 
   mainCols.forEach((col, i) => {
@@ -206,6 +206,7 @@ function renderFields(rowData) {
       input.style.fontSize = '12px';
       input.style.width = '100%';
       input.style.padding = '3px 4px';
+      input.style.textAlign = 'center';
       col.options.forEach(opt => {
         const o = document.createElement('option');
         o.value = opt;
@@ -235,6 +236,7 @@ function renderFields(rowData) {
       input.style.textOverflow = 'ellipsis';
       input.style.width = '100%';
       input.style.padding = '3px 4px';
+      input.style.textAlign = 'center';
       input.addEventListener('input', () => {
         pendingChanges[col.col] = input.value;
         triggerAutoSave();
