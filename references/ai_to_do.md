@@ -13,3 +13,10 @@
 - **Status:** Needs review (user verification)
 - **Plan:** references/plans/2026-04-01-messenger-crm-panel-reposition.md
 - **Notes:** Panel is inserted as the first child of `[aria-label^="Conversation titled"]`.
+
+## MessengerHat: Runtime messaging guard
+
+- **Stage:** Implemented
+- **Status:** Needs review (user verification)
+- **Plan:** references/plans/2026-04-01-messenger-runtime-guard.md
+- **Notes:** `content.js` now guards extension messaging so reloaded or disconnected runtimes show an inline refresh message instead of throwing `sendMessage` errors.

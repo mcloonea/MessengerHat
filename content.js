@@ -9,6 +9,7 @@ let panelEl = null;
 let lastThreads = [];
 let pendingChanges = {};
 let autoSaveTimer = null;
+const EXTENSION_REFRESH_MESSAGE = 'Extension unavailable. Refresh Messenger.';
 
 // ── Column definitions (matches your sheet exactly) ───────────────────────────
 const COLUMNS = [
@@ -29,6 +30,58 @@ const COLUMNS = [
   { key: 'kevin',     col: 'N', label: "Kevin's #",   editable: true, type: 'text' },
   { key: 'mmr',       col: 'O', label: 'MMR',         editable: true, type: 'text' },
 ];
+
+function hasExtensionRuntime() {
+  return typeof chrome !== 'undefined'
+    && !!chrome.runtime
+    && typeof chrome.runtime.sendMessage === 'function';
+}
+
+function getExtensionRuntimeError() {
+  return EXTENSION_REFRESH_MESSAGE;
+}
+
+function showExtensionUnavailable(message = EXTENSION_REFRESH_MESSAGE) {
+  const loading = document.getElementById('crm-loading');
+  const debug = document.getElementById('crm-debug');
+  const errorInline = document.getElementById('crm-error-inline');
+  const saveStatus = document.getElementById('crm-save-status-header');
+
+  if (loading) loading.style.display = 'none';
+  if (debug) debug.style.display = 'none';
+  if (errorInline) {
+    errorInline.textContent = message;
+    errorInline.style.display = 'inline';
+  }
+  if (saveStatus) saveStatus.textContent = message;
+
+  setStatus('Extension unavailable');
+}
+
+function sendExtensionMessage(message) {
+  if (!hasExtensionRuntime()) {
+    const error = getExtensionRuntimeError();
+    console.error('[CRM] Extension runtime missing for message:', message.type);
+    showExtensionUnavailable(error);
+    return Promise.resolve({ success: false, error, unavailable: true });
+  }
+
+  return new Promise((resolve) => {
+    chrome.runtime.sendMessage(message, (response) => {
+      const runtimeError = chrome.runtime?.lastError;
+      if (runtimeError) {
+        const error = runtimeError.message || getExtensionRuntimeError();
+        const userMessage = getExtensionRuntimeError();
+        console.error('[CRM] Extension message failed:', message.type, error);
+        showExtensionUnavailable(userMessage);
+        resolve({ success: false, error: userMessage, detail: error, unavailable: true });
+        return;
+      }
+
+      resolve(response || { success: false, error: 'Empty response from extension background' });
+    });
+  });
+}
 
 // ── Parse thread name from Messenger sidebar ──────────────────────────────────
 function parseThreadName(fullName) {
@@ -401,9 +454,8 @@ function performSave() {
   const today = new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
   pendingChanges['B'] = pendingChanges['B'] || today;
 
-  chrome.runtime.sendMessage(
-    { type: 'UPDATE_ROW', rowIndex: currentRowIndex, updates: pendingChanges },
-    (res) => {
+  sendExtensionMessage({ type: 'UPDATE_ROW', rowIndex: currentRowIndex, updates: pendingChanges })
+    .then((res) => {
       const status = document.getElementById('crm-save-status-header');
       if (res?.success) {
         saveBtn.textContent = 'Saved ✓';
@@ -421,8 +473,7 @@ function performSave() {
         saveBtn.style.backgroundColor = '#dc3545';
         if (status) status.textContent = res?.error || 'Save failed';
       }
-    }
-  );
+    });
 }
 
 // ── Look up current thread in sheet ──────────────────────────────────────────
@@ -446,9 +497,8 @@ function lookupCurrentThread() {
   setStatus(`Looking up: ${customer}`);
   showDebug(`🔍 Searching: "${customer}" + "${vehicle}"`);
 
-  chrome.runtime.sendMessage(
-    { type: 'FIND_ROW', customerName: customer, vehicleName: vehicle },
-    (res) => {
+  sendExtensionMessage({ type: 'FIND_ROW', customerName: customer, vehicleName: vehicle })
+    .then((res) => {
       if (res?.success && res.result) {
         if (res.result.error) {
           // Multiple matches found
@@ -464,13 +514,17 @@ function lookupCurrentThread() {
           hideDebug();
           showFields(rowData);
         }
-      } else {
-        showNoRowFound();
-        // Retry after a delay in case sheet data wasn't loaded yet
-        setTimeout(() => lookupCurrentThread(), 1000);
+        return;
       }
-    }
-  );
+
+      if (res?.unavailable) {
+        return;
+      }
+
+      showNoRowFound();
+      // Retry after a delay in case sheet data wasn't loaded yet
+      setTimeout(() => lookupCurrentThread(), 1000);
+    });
 }
 
 function setStatus(text) {
