@@ -106,7 +106,7 @@ function injectPanel() {
   panelEl.innerHTML = `
     <div class="crm-header">
       <span class="crm-title">CRM</span>
-      <span class="crm-error-inline" id="crm-error-inline" style="color:#c00;font-size:12px;margin-left:8px;display:none"></span>
+      <span class="crm-error-inline" id="crm-error-inline" style="font-size:12px;margin-left:8px;display:none"></span>
       <span class="crm-status" id="crm-status">Loading...</span>
       <button class="crm-toggle" id="crm-toggle">▲</button>
     </div>
@@ -283,9 +283,7 @@ function lookupCurrentThread() {
       if (res?.success && res.result) {
         if (res.result.error) {
           // Multiple matches found
-          setStatus('ERROR: Multiple matches');
-          showDebug(`❌ ${res.result.error}`);
-          showError(res.result.error);
+          showError();
         } else {
           currentRowIndex = res.result.rowIndex;
           const rowData = res.result.rowData;
@@ -351,14 +349,16 @@ function hideDebug() {
   if (debug) debug.style.display = 'none';
 }
 
-function showError(text) {
+function showError() {
   const loading = document.getElementById('crm-loading');
   const fields = document.getElementById('crm-fields');
   const noMatch = document.getElementById('crm-no-match');
+  const debug = document.getElementById('crm-debug');
   const errorInline = document.getElementById('crm-error-inline');
   if (loading) loading.style.display = 'none';
   if (fields) fields.style.display = 'none';
   if (noMatch) noMatch.style.display = 'none';
+  if (debug) debug.style.display = 'none';
   if (errorInline) {
     errorInline.textContent = 'error: multiple matches';
     errorInline.style.display = 'inline';
