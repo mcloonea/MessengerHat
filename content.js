@@ -167,10 +167,10 @@ function renderFields(rowData) {
   const noteCol = displayCols.find(col => col.key === 'notes');
   const mainCols = displayCols.filter(col => col.key !== 'notes');
 
-  // Render main fields in a flexible grid - size to content
+  // Render main fields in a flexible row - size to content, expand to fill
   const mainRow = document.createElement('div');
-  mainRow.style.display = 'grid';
-  mainRow.style.gridTemplateColumns = 'repeat(auto-fit, minmax(50px, auto))';
+  mainRow.style.display = 'flex';
+  mainRow.style.flexWrap = 'nowrap';
   mainRow.style.gap = '4px';
 
   mainCols.forEach((col, i) => {
@@ -183,7 +183,6 @@ function renderFields(rowData) {
     fieldWrapper.style.flexDirection = 'column';
     fieldWrapper.style.gap = '2px';
     fieldWrapper.style.flex = '1 1 auto';
-    fieldWrapper.style.minWidth = '0';
 
     const label = document.createElement('label');
     label.className = 'crm-label';
