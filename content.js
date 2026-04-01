@@ -30,11 +30,12 @@ const COLUMNS = [
 
 // ── Parse thread name from Messenger sidebar ──────────────────────────────────
 function parseThreadName(fullName) {
-  // "Kim · 2024 Volkswagen Atlas · SE 4Motion" → { customer: "Kim", vehicle: "2024 Volkswagen Atlas · SE 4Motion" }
+  // "Kim · 2024 Volkswagen Atlas · extra facebook model info" → { customer: "Kim", vehicle: "2024 Volkswagen Atlas" }
+  // Only take first two parts separated by ·, ignore extra info Facebook adds
   const parts = fullName.split(' · ');
   if (parts.length === 1) return { customer: fullName.trim(), vehicle: '' };
   const customer = parts[0].trim();
-  const vehicle = parts.slice(1).join(' · ').trim();
+  const vehicle = parts[1]?.trim() || '';
   return { customer, vehicle };
 }
 

@@ -37,13 +37,16 @@ async function findRow(customerName, vehicleName) {
     const nameMatch = customerName.trim().toLowerCase();
     const vehicleMatch = vehicleName.trim().toLowerCase();
 
+    // Check if customer name matches (exact or first name only)
+    const customerMatches = customer === nameMatch || customer.startsWith(nameMatch + ' ');
+
     // Dual match: customer name AND vehicle
-    if (customer === nameMatch && vehicle === vehicleMatch) {
+    if (customerMatches && vehicle === vehicleMatch) {
       return { rowIndex: i + 1, rowData: row }; // +1 because sheets is 1-indexed
     }
 
     // Fallback: just customer name if vehicle is empty or partial
-    if (customer === nameMatch && vehicleMatch === '') {
+    if (customerMatches && vehicleMatch === '') {
       return { rowIndex: i + 1, rowData: row };
     }
   }
