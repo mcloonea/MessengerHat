@@ -203,7 +203,7 @@ function renderFields(rowData) {
       input = document.createElement('select');
       input.className = 'crm-input crm-select';
       input.style.fontSize = '12px';
-      input.style.width = '100%';
+      input.style.width = 'fit-content';
       input.style.padding = '2px 1px';
       input.style.textAlign = 'center';
       col.options.forEach(opt => {
