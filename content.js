@@ -317,13 +317,18 @@ function triggerAutoSave() {
   // Clear any existing timer
   if (autoSaveTimer) clearTimeout(autoSaveTimer);
 
-  // Show save bar
+  // Show save bar immediately
   showSaveBar();
+  const saveBtn = document.getElementById('crm-save-btn-header');
+  if (saveBtn) {
+    saveBtn.textContent = 'Saving...';
+    saveBtn.style.backgroundColor = '#666';
+  }
 
-  // Wait 1 second before auto-saving (to batch rapid changes)
+  // Auto-save after 300ms (to batch rapid changes while typing)
   autoSaveTimer = setTimeout(() => {
     performSave();
-  }, 1000);
+  }, 300);
 }
 
 function performSave() {
