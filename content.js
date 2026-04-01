@@ -281,7 +281,7 @@ function renderFields(rowData) {
     textarea.style.overflow = 'hidden';
     const adjustHeight = () => {
       textarea.style.height = 'auto';
-      const newHeight = Math.max(textarea.scrollHeight, 30); // min 30px to match top row
+      const newHeight = Math.max(textarea.scrollHeight, 22); // min 22px to match other inputs
       textarea.style.height = Math.min(newHeight, 200) + 'px';
     };
     textarea.addEventListener('input', () => {
