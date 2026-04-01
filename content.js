@@ -167,13 +167,11 @@ function renderFields(rowData) {
   const noteCol = displayCols.find(col => col.key === 'notes');
   const mainCols = displayCols.filter(col => col.key !== 'notes');
 
-  // Render main fields in a flex row - no wrapping, allow horizontal scroll
+  // Render main fields in a flexible grid
   const mainRow = document.createElement('div');
-  mainRow.style.display = 'flex';
-  mainRow.style.flexWrap = 'nowrap';
+  mainRow.style.display = 'grid';
+  mainRow.style.gridTemplateColumns = 'repeat(auto-fit, minmax(50px, 1fr))';
   mainRow.style.gap = '4px';
-  mainRow.style.overflowX = 'auto';
-  mainRow.style.paddingBottom = '4px';
 
   mainCols.forEach((col, i) => {
     const colIndex = COLUMNS.indexOf(col);
@@ -184,7 +182,8 @@ function renderFields(rowData) {
     fieldWrapper.style.display = 'flex';
     fieldWrapper.style.flexDirection = 'column';
     fieldWrapper.style.gap = '2px';
-    fieldWrapper.style.flex = '0 0 max-content';
+    fieldWrapper.style.flex = '1 1 auto';
+    fieldWrapper.style.minWidth = '0';
 
     const label = document.createElement('label');
     label.className = 'crm-label';
@@ -205,7 +204,7 @@ function renderFields(rowData) {
       input = document.createElement('select');
       input.className = 'crm-input crm-select';
       input.style.fontSize = '12px';
-      input.style.width = 'max-content';
+      input.style.width = '100%';
       input.style.padding = '3px 4px';
       col.options.forEach(opt => {
         const o = document.createElement('option');
@@ -234,7 +233,7 @@ function renderFields(rowData) {
       input.style.fontSize = '12px';
       input.style.overflow = 'hidden';
       input.style.textOverflow = 'ellipsis';
-      input.style.width = 'max-content';
+      input.style.width = '100%';
       input.style.padding = '3px 4px';
       input.addEventListener('input', () => {
         pendingChanges[col.col] = input.value;
