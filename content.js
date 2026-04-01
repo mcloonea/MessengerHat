@@ -23,7 +23,7 @@ const COLUMNS = [
   { key: 'vehicle',   col: 'H', label: 'Vehicle',     editable: false },
   { key: 'vin',       col: 'I', label: 'VIN',         editable: true, type: 'text' },
   { key: 'condition', col: 'J', label: 'Condition',   editable: true, type: 'text' },
-  { key: 'initial',   col: 'K', label: 'Their Ask',   editable: true, type: 'text' },
+  { key: 'initial',   col: 'K', label: 'Initial',     editable: true, type: 'text' },
   { key: 'counter',   col: 'L', label: 'Counter',     editable: true, type: 'text' },
   { key: 'andrew',    col: 'M', label: 'Andrew #',    editable: true, type: 'text' },
   { key: 'kevin',     col: 'N', label: "Kevin's #",   editable: true, type: 'text' },
