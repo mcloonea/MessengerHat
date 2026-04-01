@@ -25,11 +25,5 @@
   "action": {
     "default_popup": "popup.html",
     "default_title": "Messenger CRM"
-  },
-  "oauth2": {
-    "client_id": "993837681951-cs6k7glqrhca93307que6jrqbgomibqb.apps.googleusercontent.com",
-    "scopes": [
-      "https://www.googleapis.com/auth/spreadsheets"
-    ]
   }
 }

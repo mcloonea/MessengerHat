@@ -1,32 +1,23 @@
-// background.js - Handles Google OAuth token management
+// background.js - Handles Google Sheets API access
 
 const SHEET_ID = '1HAOKyXof_UqWnkzg6ja_0QAxVkFUaGI8_LB66JJ-rGM';
 const SHEET_NAME = 'Sheet1';
-
-// Get OAuth token
-async function getToken() {
-  return new Promise((resolve, reject) => {
-    chrome.identity.getAuthToken({ interactive: true }, (token) => {
-      if (chrome.runtime.lastError) {
-        reject(chrome.runtime.lastError);
-      } else {
-        resolve(token);
-      }
-    });
-  });
-}
+const API_KEY = 'AIzaSyBwKqCp1ZDl8uIJlpz_VrWzZRPK1fJ8b08';
 
 // Find row by Customer (col F) and Vehicle (col H)
 async function findRow(customerName, vehicleName) {
-  const token = await getToken();
+  console.log('[CRM] findRow called with:', { customerName, vehicleName });
   const range = `${SHEET_NAME}!A:O`;
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}`;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`;
 
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  const res = await fetch(url);
   const data = await res.json();
+  if (!res.ok) {
+    console.error('[CRM] Sheet API error:', data);
+    return null;
+  }
   const rows = data.values || [];
+  console.log('[CRM] Found', rows.length, 'rows in sheet');
 
   // Skip header row and date rows (rows where col A looks like a date)
   for (let i = 1; i < rows.length; i++) {
@@ -55,29 +46,8 @@ async function findRow(customerName, vehicleName) {
 
 // Update specific columns in a row
 async function updateRow(rowIndex, updates) {
-  // updates = { B: 'value', C: 'value', D: 'value', ... }
-  const token = await getToken();
-  
-  const colMap = { A:0, B:1, C:2, D:3, E:4, F:5, G:6, H:7, I:8, J:9, K:10, L:11, M:12, N:13, O:14 };
-  
-  const requests = Object.entries(updates).map(([col, value]) => {
-    const colLetter = col;
-    const range = `${SHEET_NAME}!${colLetter}${rowIndex}`;
-    return fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?valueInputOption=USER_ENTERED`,
-      {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ values: [[value]] })
-      }
-    );
-  });
-
-  await Promise.all(requests);
-  return true;
+  console.error('[CRM] updateRow called but API keys cannot write. Need OAuth or service account key.');
+  throw new Error('Writing to sheets requires OAuth or service account authentication');
 }
 
 // Message handler from content script
@@ -96,10 +66,4 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true; // async
   }
 
-  if (msg.type === 'GET_TOKEN') {
-    getToken()
-      .then(token => sendResponse({ success: true, token }))
-      .catch(err => sendResponse({ success: false, error: err.message }));
-    return true;
-  }
 });
