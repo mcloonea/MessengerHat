@@ -148,6 +148,9 @@ function renderFields(rowData) {
   if (!fieldsEl) return;
 
   fieldsEl.innerHTML = '';
+  fieldsEl.style.display = 'flex';
+  fieldsEl.style.flexDirection = 'column';
+  fieldsEl.style.gap = '12px';
   const pendingChanges = {};
 
   // Fields to exclude: Handler (A), Source (E), Customer (F), Vehicle (H)
@@ -161,9 +164,8 @@ function renderFields(rowData) {
   // Render main fields in a horizontal grid
   const mainRow = document.createElement('div');
   mainRow.style.display = 'grid';
-  mainRow.style.gridTemplateColumns = 'repeat(auto-fit, minmax(100px, 1fr))';
+  mainRow.style.gridTemplateColumns = 'repeat(auto-fit, minmax(90px, 1fr))';
   mainRow.style.gap = '8px';
-  mainRow.style.marginBottom = '8px';
 
   mainCols.forEach((col, i) => {
     const colIndex = COLUMNS.indexOf(col);
