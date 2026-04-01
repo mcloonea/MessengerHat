@@ -13,7 +13,7 @@ let autoSaveTimer = null;
 // ── Column definitions (matches your sheet exactly) ───────────────────────────
 const COLUMNS = [
   { key: 'handler',   col: 'A', label: 'Handler',    editable: false },
-  { key: 'last',      col: 'B', label: 'Last Contact', editable: true, type: 'text' },
+  { key: 'last',      col: 'B', label: 'Last',        editable: true, type: 'text' },
   { key: 'notes',     col: 'C', label: 'Notes',       editable: true, type: 'textarea' },
   { key: 'stage',     col: 'D', label: 'Stage',       editable: true, type: 'select',
     options: ['Collecting Info', 'Require Review', 'Require Kevin Review', 'Reviewed', 'Working', 'Hot', 'Purchased', 'Dead - History', 'Dead - Sold', 'Dead - Other', 'Cold', 'Dead - Listing Removal'] },
