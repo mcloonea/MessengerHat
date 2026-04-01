@@ -21,7 +21,7 @@ const COLUMNS = [
   { key: 'customer',  col: 'F', label: 'Customer',    editable: false },
   { key: 'mileage',   col: 'G', label: 'Mileage',     editable: true, type: 'text' },
   { key: 'vehicle',   col: 'H', label: 'Vehicle',     editable: false },
-  { key: 'vin',       col: 'I', label: 'VIN',         editable: true, type: 'textarea' },
+  { key: 'vin',       col: 'I', label: 'VIN',         editable: true, type: 'text' },
   { key: 'condition', col: 'J', label: 'Condition',   editable: true, type: 'text' },
   { key: 'initial',   col: 'K', label: 'Initial',     editable: true, type: 'text' },
   { key: 'counter',   col: 'L', label: 'Counter',     editable: true, type: 'text' },
@@ -248,6 +248,26 @@ function renderFields(rowData) {
         updateSaveButtonState();
       });
       setTimeout(adjustHeight, 0);
+    } else if (col.key === 'vin') {
+      input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'crm-input';
+      input.value = value;
+      input.style.fontSize = '12px';
+      input.style.padding = '2px 1px';
+      input.style.textAlign = 'center';
+      const adjustWidth = () => {
+        const minWidth = 60;
+        const charWidth = 7;
+        input.style.width = Math.max(value.length * charWidth, minWidth) + 'px';
+      };
+      input.addEventListener('input', () => {
+        pendingChanges[col.col] = input.value;
+        adjustWidth();
+        triggerAutoSave();
+        updateSaveButtonState();
+      });
+      adjustWidth();
     } else {
       input = document.createElement('input');
       input.type = 'text';
