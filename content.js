@@ -204,7 +204,7 @@ function renderFields(rowData) {
       input = document.createElement('select');
       input.className = 'crm-input crm-select';
       input.style.fontSize = '12px';
-      input.style.width = 'auto';
+      input.style.width = 'fit-content';
       input.style.minWidth = '40px';
       input.style.padding = '3px 4px';
       col.options.forEach(opt => {
@@ -234,7 +234,7 @@ function renderFields(rowData) {
       input.style.fontSize = '12px';
       input.style.overflow = 'hidden';
       input.style.textOverflow = 'ellipsis';
-      input.style.width = 'auto';
+      input.style.width = 'fit-content';
       input.style.minWidth = '35px';
       input.style.padding = '3px 4px';
       input.addEventListener('input', () => {
