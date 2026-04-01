@@ -136,10 +136,10 @@
 .crm-input {
   background: #2c2c2e;
   border: 1px solid #3a3a3c;
-  border-radius: 6px;
+  border-radius: 4px;
   color: #e5e5ea;
   font-size: 12px;
-  padding: 5px 8px;
+  padding: 3px 4px;
   outline: none;
   font-family: inherit;
   width: 100%;
