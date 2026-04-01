@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "Messenger CRM",
+  "version": "1.0",
+  "description": "Strosnider Buying Center - CRM overlay for Facebook Messenger",
+  "permissions": ["activeTab", "storage", "identity"],
+  "host_permissions": [
+    "https://www.messenger.com/*",
+    "https://sheets.googleapis.com/*",
+    "https://oauth2.googleapis.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.messenger.com/marketplace*"
+      ],
+      "js": ["content.js"],
+      "css": ["panel.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Messenger CRM"
+  },
+  "oauth2": {
+    "client_id": "993837681951-cs6k7glqrhca93307que6jrqbgomibqb.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/spreadsheets"
+    ]
+  }
+}
