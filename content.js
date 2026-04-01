@@ -292,7 +292,7 @@ function lookupCurrentThread() {
           while (rowData.length < 15) rowData.push('');
 
           setStatus(`Row ${currentRowIndex} · ${rowData[3] || 'No Stage'}`);
-          showDebug(`✓ Found Row ${currentRowIndex}`);
+          hideDebug();
           showFields(rowData);
         }
       } else {
