@@ -257,14 +257,22 @@ function renderFields(rowData) {
     const textarea = document.createElement('textarea');
     textarea.className = 'crm-input crm-textarea';
     textarea.value = value;
-    textarea.rows = 3;
+    textarea.rows = 1;
     textarea.style.width = '100%';
     textarea.style.fontSize = '12px';
+    textarea.style.resize = 'vertical';
+    textarea.style.overflowWrap = 'break-word';
     textarea.addEventListener('input', () => {
       pendingChanges[noteCol.col] = textarea.value;
+      // Auto-expand height based on content
+      textarea.style.height = 'auto';
+      textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
       triggerAutoSave();
       updateSaveButtonState();
     });
+    // Initial height adjustment
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
 
     notesWrapper.appendChild(label);
     notesWrapper.appendChild(textarea);
