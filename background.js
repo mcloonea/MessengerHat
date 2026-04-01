@@ -17,26 +17,37 @@ const SERVICE_ACCOUNT = {
 
 let cachedAccessToken = null;
 let tokenExpiresAt = 0;
+let cachedSheetData = null;
+let sheetDataExpiresAt = 0;
 
 // Find row by Customer (col F) and Vehicle (col H)
 async function findRow(customerName, vehicleName) {
   let rows = [];
   try {
     console.log('[CRM] findRow called with:', { customerName, vehicleName });
-    const range = `${SHEET_NAME}!A:O`;
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`;
-    console.log('[CRM] Fetching from:', url.substring(0, 80) + '...');
 
-    const res = await fetch(url);
-    console.log('[CRM] Fetch response status:', res.status);
-    const data = await res.json();
+    // Check if we have cached sheet data that's still valid (5 min cache)
+    if (cachedSheetData && Date.now() < sheetDataExpiresAt) {
+      console.log('[CRM] Using cached sheet data');
+      rows = cachedSheetData;
+    } else {
+      const range = `${SHEET_NAME}!A:O`;
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`;
+      console.log('[CRM] Fetching fresh data from:', url.substring(0, 80) + '...');
 
-    if (!res.ok) {
-      console.error('[CRM] Sheet API error:', data);
-      return null;
+      const res = await fetch(url);
+      console.log('[CRM] Fetch response status:', res.status);
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error('[CRM] Sheet API error:', data);
+        return null;
+      }
+      rows = data.values || [];
+      cachedSheetData = rows;
+      sheetDataExpiresAt = Date.now() + (5 * 60 * 1000); // Cache for 5 minutes
+      console.log('[CRM] Found', rows.length, 'rows in sheet, cached for 5 minutes');
     }
-    rows = data.values || [];
-    console.log('[CRM] Found', rows.length, 'rows in sheet');
   } catch (err) {
     console.error('[CRM] findRow error:', err);
     throw err;
