@@ -19,6 +19,7 @@
   background: #2c2c2e;
   border-bottom: 1px solid #3a3a3c;
   cursor: default;
+  justify-content: space-between;
 }
 
 .crm-title {
@@ -50,6 +51,36 @@
 
 .crm-toggle:hover {
   color: #e5e5ea;
+}
+
+.crm-save-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.crm-save-btn-header {
+  background: #0a84ff;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.crm-save-btn-header:hover:not(:disabled) {
+  background: #0070d8;
+}
+
+.crm-save-btn-header:disabled {
+  background: #999;
+  color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .crm-body {

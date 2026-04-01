@@ -7,6 +7,7 @@ let currentThreadId = null;
 let currentRowIndex = null;
 let panelEl = null;
 let lastThreads = [];
+let pendingChanges = {};
 
 // ── Column definitions (matches your sheet exactly) ───────────────────────────
 const COLUMNS = [
@@ -105,9 +106,13 @@ function injectPanel() {
   panelEl.id = 'crm-panel';
   panelEl.innerHTML = `
     <div class="crm-header">
-      <span class="crm-title">CRM</span>
+      <span class="crm-title">Messenger Hat</span>
       <span class="crm-error-inline" id="crm-error-inline" style="font-size:12px;margin-left:8px;display:none"></span>
       <span class="crm-status" id="crm-status">Loading...</span>
+      <div class="crm-save-header" id="crm-save-header" style="display:none;gap:8px;margin-left:auto;">
+        <button class="crm-save-btn-header" id="crm-save-btn-header">Save</button>
+        <span class="crm-save-status-header" id="crm-save-status-header" style="font-size:11px;align-self:center;"></span>
+      </div>
       <button class="crm-toggle" id="crm-toggle">▲</button>
     </div>
     <div class="crm-body" id="crm-body">
@@ -151,7 +156,7 @@ function renderFields(rowData) {
   fieldsEl.style.display = 'flex';
   fieldsEl.style.flexDirection = 'column';
   fieldsEl.style.gap = '12px';
-  const pendingChanges = {};
+  pendingChanges = {};
 
   // Fields to exclude: Handler (A), Source (E), Customer (F), Vehicle (H)
   const excludeKeys = ['handler', 'source', 'customer', 'vehicle'];
@@ -210,6 +215,7 @@ function renderFields(rowData) {
       input.addEventListener('change', () => {
         pendingChanges[col.col] = input.value;
         showSaveBar();
+        updateSaveButtonState();
       });
     } else {
       input = document.createElement('input');
@@ -220,6 +226,7 @@ function renderFields(rowData) {
       input.addEventListener('input', () => {
         pendingChanges[col.col] = input.value;
         showSaveBar();
+        updateSaveButtonState();
       });
     }
 
@@ -255,6 +262,7 @@ function renderFields(rowData) {
     textarea.addEventListener('input', () => {
       pendingChanges[noteCol.col] = textarea.value;
       showSaveBar();
+      updateSaveButtonState();
     });
 
     notesWrapper.appendChild(label);
@@ -262,14 +270,15 @@ function renderFields(rowData) {
     fieldsEl.appendChild(notesWrapper);
   }
 
-  // Save button handler
-  const saveBtn = document.getElementById('crm-save-btn');
+  // Save button handler (in header)
+  const saveBtn = document.getElementById('crm-save-btn-header');
   if (saveBtn) {
     saveBtn.onclick = async () => {
       if (!currentRowIndex || Object.keys(pendingChanges).length === 0) return;
       saveBtn.disabled = true;
       saveBtn.textContent = 'Saving...';
-      
+      saveBtn.style.backgroundColor = '#666';
+
       // Always update last contact date (col B) on save
       const today = new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
       pendingChanges['B'] = pendingChanges['B'] || today;
@@ -277,18 +286,19 @@ function renderFields(rowData) {
       chrome.runtime.sendMessage(
         { type: 'UPDATE_ROW', rowIndex: currentRowIndex, updates: pendingChanges },
         (res) => {
-          saveBtn.disabled = false;
-          saveBtn.textContent = 'Save to Sheet';
-          const status = document.getElementById('crm-save-status');
+          const status = document.getElementById('crm-save-status-header');
           if (res?.success) {
-            status.textContent = '✓ Saved';
-            status.style.color = '#1a7a4a';
+            saveBtn.textContent = 'Saved ✓';
+            saveBtn.style.backgroundColor = '#28a745';
+            saveBtn.disabled = true;
+            if (status) status.textContent = '';
             // Clear pending
             Object.keys(pendingChanges).forEach(k => delete pendingChanges[k]);
-            setTimeout(() => { status.textContent = ''; hideSaveBar(); }, 2000);
+            setTimeout(() => { saveBtn.textContent = 'Save'; saveBtn.style.backgroundColor = ''; hideSaveBar(); }, 2000);
           } else {
-            status.textContent = '✗ Error';
-            status.style.color = '#c0392b';
+            saveBtn.textContent = 'Error ✗';
+            saveBtn.style.backgroundColor = '#dc3545';
+            if (status) status.textContent = res?.error || 'Save failed';
           }
         }
       );
@@ -297,13 +307,35 @@ function renderFields(rowData) {
 }
 
 function showSaveBar() {
-  const bar = document.getElementById('crm-save-bar');
-  if (bar) bar.style.display = 'flex';
+  const bar = document.getElementById('crm-save-header');
+  const btn = document.getElementById('crm-save-btn-header');
+  if (bar) {
+    bar.style.display = 'flex';
+    if (btn) btn.disabled = false;
+  }
 }
 
 function hideSaveBar() {
-  const bar = document.getElementById('crm-save-bar');
+  const bar = document.getElementById('crm-save-header');
   if (bar) bar.style.display = 'none';
+}
+
+function updateSaveButtonState() {
+  const saveBtn = document.getElementById('crm-save-btn-header');
+  if (!saveBtn) return;
+
+  // Check if there are any pending changes
+  const hasPendingChanges = Object.keys(pendingChanges || {}).length > 0;
+
+  if (hasPendingChanges) {
+    saveBtn.disabled = false;
+    saveBtn.style.backgroundColor = '';
+    saveBtn.style.opacity = '1';
+  } else {
+    saveBtn.disabled = true;
+    saveBtn.style.backgroundColor = '#999';
+    saveBtn.style.opacity = '0.6';
+  }
 }
 
 // ── Look up current thread in sheet ──────────────────────────────────────────
@@ -341,7 +373,7 @@ function lookupCurrentThread() {
           // Pad to 15 columns
           while (rowData.length < 15) rowData.push('');
 
-          setStatus(`Row ${currentRowIndex} · ${rowData[3] || 'No Stage'}`);
+          setStatus(`Row ${currentRowIndex}`);
           hideDebug();
           showFields(rowData);
         }
@@ -372,6 +404,7 @@ function showFields(rowData) {
   if (fields) {
     fields.style.display = 'grid';
     renderFields(rowData);
+    updateSaveButtonState();
   }
 }
 
