@@ -106,12 +106,12 @@ function injectPanel() {
   panelEl.innerHTML = `
     <div class="crm-header">
       <span class="crm-title">CRM</span>
+      <span class="crm-error-inline" id="crm-error-inline" style="color:#c00;font-size:12px;margin-left:8px;display:none"></span>
       <span class="crm-status" id="crm-status">Loading...</span>
       <button class="crm-toggle" id="crm-toggle">▲</button>
     </div>
     <div class="crm-body" id="crm-body">
       <div class="crm-debug" id="crm-debug" style="background:#f0f0f0;padding:8px;margin-bottom:8px;font-size:11px;border-left:3px solid #0066cc;display:none"></div>
-      <div class="crm-error" id="crm-error" style="background:#fee;padding:8px;margin-bottom:8px;color:#c00;border-left:3px solid #c00;display:none"></div>
       <div class="crm-loading" id="crm-loading">Looking up lead...</div>
       <div class="crm-fields" id="crm-fields" style="display:none"></div>
       <div class="crm-no-match" id="crm-no-match" style="display:none">
@@ -317,10 +317,10 @@ function showFields(rowData) {
   const loading = document.getElementById('crm-loading');
   const fields = document.getElementById('crm-fields');
   const noMatch = document.getElementById('crm-no-match');
-  const error = document.getElementById('crm-error');
+  const errorInline = document.getElementById('crm-error-inline');
   if (loading) loading.style.display = 'none';
   if (noMatch) noMatch.style.display = 'none';
-  if (error) error.style.display = 'none';
+  if (errorInline) errorInline.style.display = 'none';
   if (fields) {
     fields.style.display = 'grid';
     renderFields(rowData);
@@ -331,8 +331,10 @@ function showNoMatch() {
   const loading = document.getElementById('crm-loading');
   const fields = document.getElementById('crm-fields');
   const noMatch = document.getElementById('crm-no-match');
+  const errorInline = document.getElementById('crm-error-inline');
   if (loading) loading.style.display = 'none';
   if (fields) fields.style.display = 'none';
+  if (errorInline) errorInline.style.display = 'none';
   if (noMatch) noMatch.style.display = 'flex';
 }
 
@@ -350,16 +352,16 @@ function hideDebug() {
 }
 
 function showError(text) {
-  const error = document.getElementById('crm-error');
   const loading = document.getElementById('crm-loading');
   const fields = document.getElementById('crm-fields');
   const noMatch = document.getElementById('crm-no-match');
+  const errorInline = document.getElementById('crm-error-inline');
   if (loading) loading.style.display = 'none';
   if (fields) fields.style.display = 'none';
   if (noMatch) noMatch.style.display = 'none';
-  if (error) {
-    error.textContent = text;
-    error.style.display = 'block';
+  if (errorInline) {
+    errorInline.textContent = 'error: multiple matches';
+    errorInline.style.display = 'inline';
   }
 }
 
