@@ -21,7 +21,7 @@ const COLUMNS = [
   { key: 'customer',  col: 'F', label: 'Customer',    editable: false },
   { key: 'mileage',   col: 'G', label: 'Mileage',     editable: true, type: 'text' },
   { key: 'vehicle',   col: 'H', label: 'Vehicle',     editable: false },
-  { key: 'vin',       col: 'I', label: 'VIN',         editable: true, type: 'text' },
+  { key: 'vin',       col: 'I', label: 'VIN',         editable: true, type: 'textarea' },
   { key: 'condition', col: 'J', label: 'Condition',   editable: true, type: 'text' },
   { key: 'initial',   col: 'K', label: 'Initial',     editable: true, type: 'text' },
   { key: 'counter',   col: 'L', label: 'Counter',     editable: true, type: 'text' },
@@ -225,6 +225,29 @@ function renderFields(rowData) {
         triggerAutoSave();
         updateSaveButtonState();
       });
+    } else if (col.type === 'textarea') {
+      input = document.createElement('textarea');
+      input.className = 'crm-input crm-textarea';
+      input.value = value;
+      input.style.width = '100%';
+      input.style.fontSize = '12px';
+      input.style.padding = '2px 1px';
+      input.style.resize = 'vertical';
+      input.style.overflowWrap = 'break-word';
+      input.style.wordWrap = 'break-word';
+      input.style.overflow = 'hidden';
+      const adjustHeight = () => {
+        input.style.height = 'auto';
+        const newHeight = Math.max(input.scrollHeight, 22);
+        input.style.height = newHeight + 'px';
+      };
+      input.addEventListener('input', () => {
+        pendingChanges[col.col] = input.value;
+        adjustHeight();
+        triggerAutoSave();
+        updateSaveButtonState();
+      });
+      setTimeout(adjustHeight, 0);
     } else {
       input = document.createElement('input');
       input.type = 'text';
