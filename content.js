@@ -167,11 +167,13 @@ function renderFields(rowData) {
   const noteCol = displayCols.find(col => col.key === 'notes');
   const mainCols = displayCols.filter(col => col.key !== 'notes');
 
-  // Render main fields in a flex row with wrapping
+  // Render main fields in a flex row - no wrapping, allow horizontal scroll
   const mainRow = document.createElement('div');
   mainRow.style.display = 'flex';
-  mainRow.style.flexWrap = 'wrap';
+  mainRow.style.flexWrap = 'nowrap';
   mainRow.style.gap = '4px';
+  mainRow.style.overflowX = 'auto';
+  mainRow.style.paddingBottom = '4px';
 
   mainCols.forEach((col, i) => {
     const colIndex = COLUMNS.indexOf(col);
@@ -182,8 +184,7 @@ function renderFields(rowData) {
     fieldWrapper.style.display = 'flex';
     fieldWrapper.style.flexDirection = 'column';
     fieldWrapper.style.gap = '2px';
-    fieldWrapper.style.flex = '0 0 auto';
-    fieldWrapper.style.minWidth = '0';
+    fieldWrapper.style.flex = '0 0 max-content';
 
     const label = document.createElement('label');
     label.className = 'crm-label';
