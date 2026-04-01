@@ -182,14 +182,9 @@ function renderFields(rowData) {
     fieldWrapper.style.display = 'flex';
     fieldWrapper.style.flexDirection = 'column';
     fieldWrapper.style.gap = '2px';
-    // Empty fields stay narrow, fields with content take ~100px
-    if (hasContent) {
-      fieldWrapper.style.flex = '1 1 100px';
-      fieldWrapper.style.minWidth = '100px';
-    } else {
-      fieldWrapper.style.flex = '0 1 auto';
-      fieldWrapper.style.minWidth = 'auto';
-    }
+    fieldWrapper.style.flex = '1 1 auto';
+    fieldWrapper.style.minWidth = '0'; // Allow shrinking below content size
+    fieldWrapper.style.overflow = 'hidden';
 
     const label = document.createElement('label');
     label.className = 'crm-label';
@@ -235,6 +230,8 @@ function renderFields(rowData) {
       input.className = 'crm-input';
       input.value = value;
       input.style.fontSize = '12px';
+      input.style.overflow = 'hidden';
+      input.style.textOverflow = 'ellipsis';
       input.addEventListener('input', () => {
         pendingChanges[col.col] = input.value;
         triggerAutoSave();
@@ -275,17 +272,21 @@ function renderFields(rowData) {
     textarea.style.fontSize = '12px';
     textarea.style.resize = 'vertical';
     textarea.style.overflowWrap = 'break-word';
+    textarea.style.wordWrap = 'break-word';
+    textarea.style.overflow = 'hidden';
     textarea.addEventListener('input', () => {
       pendingChanges[noteCol.col] = textarea.value;
       // Auto-expand height based on content
       textarea.style.height = 'auto';
-      textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
+      textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
       triggerAutoSave();
       updateSaveButtonState();
     });
     // Initial height adjustment
-    textarea.style.height = 'auto';
-    textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
+    setTimeout(() => {
+      textarea.style.height = 'auto';
+      textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
+    }, 0);
 
     notesWrapper.appendChild(label);
     notesWrapper.appendChild(textarea);
