@@ -274,6 +274,7 @@ function renderFields(rowData) {
     textarea.rows = 1;
     textarea.style.width = '100%';
     textarea.style.fontSize = '12px';
+    textarea.style.padding = '2px 1px';
     textarea.style.resize = 'vertical';
     textarea.style.overflowWrap = 'break-word';
     textarea.style.wordWrap = 'break-word';
