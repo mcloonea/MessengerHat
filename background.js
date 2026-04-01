@@ -89,8 +89,75 @@ async function findRow(customerName, vehicleName) {
     return { rowIndex: matches[0].rowIndex, rowData: matches[0].rowData };
   }
 
-  console.log('[CRM] No matching row found');
-  return null;
+  console.log('[CRM] No matching row found, creating new row');
+  try {
+    const newRow = await createNewRow(customerName, rows);
+    return newRow;
+  } catch (err) {
+    console.error('[CRM] Failed to create new row:', err);
+    return null;
+  }
+}
+
+// Create a new row for a customer
+async function createNewRow(customerName, rows) {
+  try {
+    const token = await getAccessToken();
+
+    // Find the first empty row (where column B is empty)
+    let newRowIndex = null;
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      const lastContact = (row[1] || '').trim();
+      if (!lastContact) {
+        newRowIndex = i + 1; // +1 because API rows are 1-indexed
+        break;
+      }
+    }
+
+    // If no empty row found, add at the end
+    if (!newRowIndex) {
+      newRowIndex = rows.length + 1;
+    }
+
+    console.log(`[CRM] Adding customer "${customerName}" to row ${newRowIndex}`);
+
+    // Write customer name to column F (index 5)
+    const range = `${SHEET_NAME}!F${newRowIndex}`;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?valueInputOption=RAW`;
+
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ values: [[customerName]] })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      console.error('[CRM] Failed to add customer:', err);
+      return null;
+    }
+
+    console.log(`[CRM] Created new row ${newRowIndex}`);
+
+    // Return the new row with customer name filled in
+    const newRowData = [];
+    for (let i = 0; i < 15; i++) {
+      if (i === 5) {
+        newRowData.push(customerName);
+      } else {
+        newRowData.push('');
+      }
+    }
+
+    return { rowIndex: newRowIndex, rowData: newRowData };
+  } catch (err) {
+    console.error('[CRM] createNewRow error:', err);
+    throw err;
+  }
 }
 
 // Helper: base64url encode
