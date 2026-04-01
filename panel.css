@@ -15,11 +15,12 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 12px;
+  padding: 5px 12px;
   background: #2c2c2e;
   border-bottom: 1px solid #3a3a3c;
   cursor: default;
   justify-content: space-between;
+  height: 28px;
 }
 
 .crm-title {
@@ -62,14 +63,17 @@
 .crm-save-btn-header {
   background: #0a84ff;
   border: none;
-  border-radius: 4px;
+  border-radius: 3px;
   color: white;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
-  padding: 4px 10px;
+  padding: 2px 7px;
   font-family: inherit;
   white-space: nowrap;
+  height: 20px;
+  display: flex;
+  align-items: center;
 }
 
 .crm-save-btn-header:hover:not(:disabled) {

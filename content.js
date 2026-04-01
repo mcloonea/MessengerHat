@@ -110,9 +110,9 @@ function injectPanel() {
       <span class="crm-title">Messenger Hat</span>
       <span class="crm-error-inline" id="crm-error-inline" style="font-size:12px;margin-left:8px;display:none"></span>
       <span class="crm-status" id="crm-status">Loading...</span>
-      <div class="crm-save-header" id="crm-save-header" style="display:none;gap:8px;margin-left:auto;">
+      <div class="crm-save-header" id="crm-save-header" style="display:none;gap:6px;margin-left:auto;">
         <button class="crm-save-btn-header" id="crm-save-btn-header">Save</button>
-        <span class="crm-save-status-header" id="crm-save-status-header" style="font-size:11px;align-self:center;"></span>
+        <span class="crm-save-status-header" id="crm-save-status-header" style="font-size:10px;align-self:center;"></span>
       </div>
       <button class="crm-toggle" id="crm-toggle">▲</button>
     </div>
