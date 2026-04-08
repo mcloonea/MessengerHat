@@ -17,7 +17,7 @@ const COLUMNS = [
   { key: 'last',      col: 'B', label: 'Last',        editable: true, type: 'text' },
   { key: 'notes',     col: 'C', label: 'Notes',       editable: true, type: 'textarea' },
   { key: 'stage',     col: 'D', label: 'Stage',       editable: true, type: 'select',
-    options: ['Collecting Info', 'Require Review', 'Require Kevin Review', 'Reviewed', 'Working', 'Hot', 'Purchased', 'Dead - History', 'Dead - Sold', 'Dead - Other', 'Cold', 'Dead - Listing Removal'] },
+    options: ['Collecting Info', 'Require Review', 'Require Kevin Review', 'Reviewed', 'Working', 'Hot', 'Purchased', 'Dead - History', 'Dead - Sold', 'Dead - Other', 'Cold', 'Dead - Listing Removed'] },
   { key: 'source',    col: 'E', label: 'Source',      editable: false },
   { key: 'customer',  col: 'F', label: 'Customer',    editable: false },
   { key: 'mileage',   col: 'G', label: 'Mileage',     editable: true, type: 'text' },
@@ -502,7 +502,8 @@ function lookupCurrentThread() {
       if (res?.success && res.result) {
         if (res.result.error) {
           // Multiple matches found
-          showError();
+          setStatus('Multiple matches');
+          showError(res.result.error);
         } else {
           currentRowIndex = res.result.rowIndex;
           const rowData = res.result.rowData;
@@ -518,6 +519,12 @@ function lookupCurrentThread() {
       }
 
       if (res?.unavailable) {
+        return;
+      }
+
+      if (res?.error) {
+        setStatus('Lookup failed');
+        showLookupError(res.error);
         return;
       }
 
@@ -571,7 +578,7 @@ function hideDebug() {
   if (debug) debug.style.display = 'none';
 }
 
-function showError() {
+function showError(message = 'error: multiple matches') {
   const loading = document.getElementById('crm-loading');
   const fields = document.getElementById('crm-fields');
   const noMatch = document.getElementById('crm-no-match');
@@ -582,7 +589,23 @@ function showError() {
   if (noMatch) noMatch.style.display = 'none';
   if (debug) debug.style.display = 'none';
   if (errorInline) {
-    errorInline.textContent = 'error: multiple matches';
+    errorInline.textContent = message;
+    errorInline.style.display = 'inline';
+  }
+}
+
+function showLookupError(message) {
+  const loading = document.getElementById('crm-loading');
+  const fields = document.getElementById('crm-fields');
+  const noMatch = document.getElementById('crm-no-match');
+  const debug = document.getElementById('crm-debug');
+  const errorInline = document.getElementById('crm-error-inline');
+  if (loading) loading.style.display = 'none';
+  if (fields) fields.style.display = 'none';
+  if (noMatch) noMatch.style.display = 'none';
+  if (debug) debug.style.display = 'none';
+  if (errorInline) {
+    errorInline.textContent = message;
     errorInline.style.display = 'inline';
   }
 }

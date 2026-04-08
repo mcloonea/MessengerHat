@@ -36,7 +36,7 @@ const SHEET_ID = 'YOUR_SPREADSHEET_ID_HERE';
 with your spreadsheet ID. You can find it in the URL:
 `https://docs.google.com/spreadsheets/d/THIS_PART_HERE/edit`
 
-Also update `SHEET_NAME` if your sheet tab isn't named `Sheet1`.
+Also update `SHEET_NAME` so it matches your sheet tab title in Google Sheets, for example `2026`.
 
 In `content.js`, replace:
 ```

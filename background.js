@@ -1,7 +1,8 @@
 // background.js - Handles Google Sheets API access
 
 const SHEET_ID = '1HAOKyXof_UqWnkzg6ja_0QAxVkFUaGI8_LB66JJ-rGM';
-const SHEET_NAME = 'Sheet1';
+// Google Sheets API ranges use the tab title, not the spreadsheet file name.
+const SHEET_NAME = '2026';
 const API_KEY = 'AIzaSyBwKqCp1ZDl8uIJlpz_VrWzZRPK1fJ8b08';
 
 // Service account credentials for writing
@@ -20,6 +21,16 @@ let tokenExpiresAt = 0;
 let cachedSheetData = null;
 let sheetDataExpiresAt = 0;
 
+function invalidateSheetCache() {
+  cachedSheetData = null;
+  sheetDataExpiresAt = 0;
+}
+
+function getSheetRange(cells) {
+  const escapedSheetName = SHEET_NAME.replace(/'/g, "''");
+  return `'${escapedSheetName}'!${cells}`;
+}
+
 // Find row by Customer (col F) and Vehicle (col H)
 async function findRow(customerName, vehicleName) {
   let rows = [];
@@ -31,7 +42,7 @@ async function findRow(customerName, vehicleName) {
       console.log('[CRM] Using cached sheet data');
       rows = cachedSheetData;
     } else {
-      const range = `${SHEET_NAME}!A:O`;
+      const range = getSheetRange('A:O');
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`;
       console.log('[CRM] Fetching fresh data from:', url.substring(0, 80) + '...');
 
@@ -40,8 +51,9 @@ async function findRow(customerName, vehicleName) {
       const data = await res.json();
 
       if (!res.ok) {
-        console.error('[CRM] Sheet API error:', data);
-        return null;
+        const message = data?.error?.message || `Sheet API request failed with status ${res.status}`;
+        console.error('[CRM] Sheet API error:', { status: res.status, range, message, details: data });
+        throw new Error(message);
       }
       rows = data.values || [];
       cachedSheetData = rows;
@@ -195,7 +207,7 @@ async function updateRow(rowIndex, updates) {
     // Update each column individually to avoid any mapping issues
     for (const col in updates) {
       const value = updates[col];
-      const range = `${SHEET_NAME}!${col}${rowIndex}`;
+      const range = getSheetRange(`${col}${rowIndex}`);
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?valueInputOption=RAW`;
 
       const res = await fetch(url, {
@@ -216,6 +228,8 @@ async function updateRow(rowIndex, updates) {
       console.log(`[CRM] Updated ${col}${rowIndex}`);
     }
 
+    invalidateSheetCache();
+    console.log('[CRM] Cleared cached sheet data after write');
     console.log('[CRM] Row updated successfully');
     return { success: true };
   } catch (err) {
