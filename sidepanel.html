@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messenger CRM</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <div id="crm-panel">
+    <div class="crm-header">
+      <span class="crm-title">Messenger Hat</span>
+      <span class="crm-error-inline" id="crm-error-inline" style="font-size:12px;margin-left:8px;display:none"></span>
+      <span class="crm-status" id="crm-status">Waiting for Messenger...</span>
+      <div class="crm-save-header" id="crm-save-header" style="display:none;gap:6px;margin-left:auto;">
+        <button class="crm-save-btn-header" id="crm-save-btn-header">Save</button>
+        <span class="crm-save-status-header" id="crm-save-status-header" style="font-size:10px;align-self:center;"></span>
+      </div>
+    </div>
+    <div class="crm-body" id="crm-body">
+      <div class="crm-debug" id="crm-debug" style="background:#f0f0f0;padding:8px;margin-bottom:8px;font-size:11px;border-left:3px solid #0066cc;display:none"></div>
+      <div class="crm-loading" id="crm-loading">Waiting for Messenger...</div>
+      <div class="crm-fields" id="crm-fields" style="display:none"></div>
+      <div class="crm-no-match" id="crm-no-match" style="display:none">
+        <span>No match found.</span>
+        <a href="https://docs.google.com/spreadsheets/d/1HAOKyXof_UqWnkzg6ja_0QAxVkFUaGI8_LB66JJ-rGM/edit" target="_blank">Open Sheet →</a>
+      </div>
+    </div>
+  </div>
+  <script src="sidepanel.js"></script>
+</body>
+</html>

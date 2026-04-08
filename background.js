@@ -239,8 +239,27 @@ async function updateRow(rowIndex, updates) {
   }
 }
 
-// Message handler from content script
+// Message handler from content script and side panel
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg.type === 'THREAD_CHANGED') {
+    console.log('[CRM] THREAD_CHANGED from content script:', msg);
+    // Open side panel for this window
+    if (sender.tab?.windowId) {
+      chrome.sidePanel.open({ windowId: sender.tab.windowId }, () => {
+        // Forward the message to the side panel
+        chrome.runtime.sendMessage(
+          { type: 'THREAD_CHANGED', ...msg },
+          (response) => {
+            if (chrome.runtime?.lastError) {
+              console.error('[CRM] Failed to forward to side panel:', chrome.runtime.lastError);
+            }
+          }
+        );
+      });
+    }
+    return true;
+  }
+
   if (msg.type === 'FIND_ROW') {
     findRow(msg.customerName, msg.vehicleName)
       .then(result => sendResponse({ success: true, result }))
