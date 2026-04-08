@@ -55,22 +55,22 @@ function renderFields(rowData) {
 
   // Pricing section fields
   const pricingFields = ['initial', 'counter', 'andrew', 'kevin', 'mmr'];
+  const notesFields = ['condition', 'notes'];
 
-  // Render ALL columns EXCEPT vehicle, source, and handler in their own rows
+  // Render ALL columns EXCEPT vehicle, source, handler, condition, notes
   COLUMNS.forEach((col, idx) => {
-    // Skip vehicle (top bar), source (not needed), handler (shown as customer name in top)
-    if (col.key === 'vehicle' || col.key === 'source' || col.key === 'handler') return;
+    // Skip vehicle (top bar), source (not needed), handler (shown as customer name), condition/notes (separate section)
+    if (col.key === 'vehicle' || col.key === 'source' || col.key === 'handler' || notesFields.includes(col.key)) return;
 
     // Add pricing section header before first pricing field
     if (pricingFields.includes(col.key) && (idx === 0 || !pricingFields.includes(COLUMNS[idx - 1]?.key))) {
       const sectionHeader = document.createElement('div');
       sectionHeader.style.cssText = `
-        padding: 10px 0 8px 0;
+        padding: 12px 0 8px 0;
         font-size: 14px;
         font-weight: 600;
         color: #1a1a1a;
-        border-top: 1px solid #e0e0e0;
-        margin-top: 4px;
+        margin-top: 0;
       `;
       sectionHeader.textContent = 'Pricing';
       fieldsEl.appendChild(sectionHeader);
@@ -150,6 +150,95 @@ function renderFields(rowData) {
     fieldRow.appendChild(inputWrapper);
     fieldsEl.appendChild(fieldRow);
   });
+
+  // Notes section with Condition and Notes side by side
+  const conditionCol = COLUMNS.find(c => c.key === 'condition');
+  const notesCol = COLUMNS.find(c => c.key === 'notes');
+
+  if (conditionCol || notesCol) {
+    // Add Notes section header
+    const notesHeader = document.createElement('div');
+    notesHeader.style.cssText = `
+      padding: 12px 0 8px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-top: 0;
+    `;
+    notesHeader.textContent = 'Notes';
+    fieldsEl.appendChild(notesHeader);
+
+    // Create side-by-side container
+    const notesContainer = document.createElement('div');
+    notesContainer.style.cssText = `
+      display: flex;
+      gap: 8px;
+      margin-bottom: 4px;
+    `;
+
+    // Condition field (left)
+    if (conditionCol) {
+      const conditionIdx = COLUMNS.indexOf(conditionCol);
+      const conditionValue = (rowData[conditionIdx] || '').toString().trim();
+
+      const conditionWrapper = document.createElement('div');
+      conditionWrapper.style.cssText = `flex: 1; min-width: 0;`;
+
+      const condLabel = document.createElement('div');
+      condLabel.className = 'crm-field-label';
+      condLabel.textContent = 'Condition';
+
+      const condInput = document.createElement('input');
+      condInput.type = 'text';
+      condInput.className = 'crm-input';
+      condInput.value = conditionValue;
+      condInput.addEventListener('input', () => {
+        pendingChanges['J'] = condInput.value;
+        triggerAutoSave();
+        updateSaveButtonState();
+      });
+
+      conditionWrapper.appendChild(condLabel);
+      conditionWrapper.appendChild(condInput);
+      notesContainer.appendChild(conditionWrapper);
+    }
+
+    // Notes field (right)
+    if (notesCol) {
+      const notesIdx = COLUMNS.indexOf(notesCol);
+      const notesValue = (rowData[notesIdx] || '').toString().trim();
+
+      const notesWrapper = document.createElement('div');
+      notesWrapper.style.cssText = `flex: 1; min-width: 0;`;
+
+      const notesLabel = document.createElement('div');
+      notesLabel.className = 'crm-field-label';
+      notesLabel.textContent = 'Notes';
+
+      const notesInput = document.createElement('textarea');
+      notesInput.className = 'crm-input crm-textarea';
+      notesInput.value = notesValue;
+      notesInput.style.minHeight = '60px';
+      const adjustHeight = () => {
+        notesInput.style.height = 'auto';
+        const newHeight = Math.max(notesInput.scrollHeight, 60);
+        notesInput.style.height = newHeight + 'px';
+      };
+      notesInput.addEventListener('input', () => {
+        pendingChanges['C'] = notesInput.value;
+        adjustHeight();
+        triggerAutoSave();
+        updateSaveButtonState();
+      });
+      setTimeout(adjustHeight, 0);
+
+      notesWrapper.appendChild(notesLabel);
+      notesWrapper.appendChild(notesInput);
+      notesContainer.appendChild(notesWrapper);
+    }
+
+    fieldsEl.appendChild(notesContainer);
+  }
 
   // Save button handler
   const saveBtn = document.getElementById('crm-save-btn-header');
