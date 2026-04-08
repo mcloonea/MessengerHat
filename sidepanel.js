@@ -53,10 +53,30 @@ function renderFields(rowData) {
   fieldsEl.style.gap = '0';
   pendingChanges = {};
 
+  // Pricing section fields
+  const pricingFields = ['initial', 'counter', 'andrew', 'kevin', 'mmr'];
+
   // Render ALL columns EXCEPT vehicle and source in their own rows
-  COLUMNS.forEach((col) => {
+  COLUMNS.forEach((col, idx) => {
     // Skip vehicle and source - vehicle shown in top bar, source not needed for Messenger
     if (col.key === 'vehicle' || col.key === 'source') return;
+
+    // Add pricing section header before first pricing field
+    if (pricingFields.includes(col.key) && (idx === 0 || !pricingFields.includes(COLUMNS[idx - 1]?.key))) {
+      const sectionHeader = document.createElement('div');
+      sectionHeader.style.cssText = `
+        padding: 10px 0 6px 0;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #888;
+        letter-spacing: 0.03em;
+        border-top: 1px solid #e0e0e0;
+        margin-top: 4px;
+      `;
+      sectionHeader.textContent = 'Pricing';
+      fieldsEl.appendChild(sectionHeader);
+    }
 
     const colIndex = COLUMNS.indexOf(col);
     const value = (rowData[colIndex] || '').toString().trim();
