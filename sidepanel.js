@@ -53,27 +53,38 @@ function renderFields(rowData) {
   fieldsEl.style.gap = '0';
   pendingChanges = {};
 
-  // Pricing section fields
+  // Section definitions
+  const stageFields = ['last', 'stage'];
+  const vehicleFields = ['mileage', 'vin'];
   const pricingFields = ['initial', 'counter', 'andrew', 'kevin', 'mmr'];
   const notesFields = ['condition', 'notes'];
 
-  // Render ALL columns EXCEPT vehicle, source, handler, condition, notes
-  COLUMNS.forEach((col, idx) => {
-    // Skip vehicle (top bar), source (not needed), handler (shown as customer name), condition/notes (separate section)
-    if (col.key === 'vehicle' || col.key === 'source' || col.key === 'handler' || notesFields.includes(col.key)) return;
+  // Helper function to add section header
+  const addSectionHeader = (name) => {
+    const sectionHeader = document.createElement('div');
+    sectionHeader.style.cssText = `
+      padding: 12px 0 8px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-top: 0;
+    `;
+    sectionHeader.textContent = name;
+    fieldsEl.appendChild(sectionHeader);
+  };
 
-    // Add pricing section header before first pricing field
-    if (pricingFields.includes(col.key) && (idx === 0 || !pricingFields.includes(COLUMNS[idx - 1]?.key))) {
-      const sectionHeader = document.createElement('div');
-      sectionHeader.style.cssText = `
-        padding: 12px 0 8px 0;
-        font-size: 14px;
-        font-weight: 600;
-        color: #1a1a1a;
-        margin-top: 0;
-      `;
-      sectionHeader.textContent = 'Pricing';
-      fieldsEl.appendChild(sectionHeader);
+  // Render ALL columns EXCEPT vehicle, source, handler, customer, condition, notes
+  COLUMNS.forEach((col, idx) => {
+    // Skip: vehicle (top bar), source (not needed), handler (shown as customer name), customer (shown at top), condition/notes (separate section)
+    if (col.key === 'vehicle' || col.key === 'source' || col.key === 'handler' || col.key === 'customer' || notesFields.includes(col.key)) return;
+
+    // Add section headers
+    if (stageFields.includes(col.key) && (idx === 0 || !stageFields.includes(COLUMNS[idx - 1]?.key))) {
+      addSectionHeader('Stage');
+    } else if (vehicleFields.includes(col.key) && (idx === 0 || !vehicleFields.includes(COLUMNS[idx - 1]?.key))) {
+      addSectionHeader('Vehicle');
+    } else if (pricingFields.includes(col.key) && (idx === 0 || !pricingFields.includes(COLUMNS[idx - 1]?.key))) {
+      addSectionHeader('Pricing');
     }
 
     const colIndex = COLUMNS.indexOf(col);
