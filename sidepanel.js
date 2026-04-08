@@ -415,11 +415,16 @@ function lookupThread(threadMsg) {
           const rowData = res.result.rowData;
           while (rowData.length < 15) rowData.push('');
 
-          // Populate top bar (2 rows)
-          document.getElementById('crm-customer').textContent = customer || '—';
-          document.getElementById('crm-customer').title = customer;
-          document.getElementById('crm-vehicle').textContent = vehicle || '—';
-          document.getElementById('crm-vehicle').title = vehicle;
+          // Get full customer name from sheet (column F = index 5)
+          const fullCustomerName = (rowData[5] || '').toString().trim();
+          // Get full vehicle name from sheet (column H = index 7)
+          const fullVehicleName = (rowData[7] || '').toString().trim();
+
+          // Populate top bar (2 rows) with full names from sheet
+          document.getElementById('crm-customer').textContent = fullCustomerName || '—';
+          document.getElementById('crm-customer').title = fullCustomerName;
+          document.getElementById('crm-vehicle').textContent = fullVehicleName || '—';
+          document.getElementById('crm-vehicle').title = fullVehicleName;
           document.getElementById('crm-row-number').textContent = `Row ${currentRowIndex}`;
 
           setStatus('');
