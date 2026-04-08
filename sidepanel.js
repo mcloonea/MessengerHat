@@ -33,7 +33,7 @@ function sendBackgroundMessage(message) {
     chrome.runtime.sendMessage(message, (response) => {
       const runtimeError = chrome.runtime?.lastError;
       if (runtimeError) {
-        console.error('[CRM] Message failed:', message.type, runtimeError.message);
+        console.error('[MessengerHat] Message failed:', message.type, runtimeError.message);
         resolve({ success: false, error: runtimeError.message, unavailable: true });
         return;
       }
@@ -364,41 +364,54 @@ function showLoading() {
 // ── Handle THREAD_CHANGED message from content.js ──────────────────────────────
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === 'THREAD_CHANGED') {
-    console.log('[CRM] THREAD_CHANGED:', msg);
-    currentThreadId = msg.threadId;
-    currentRowIndex = null;
-    showLoading();
-
-    const { customer, vehicle } = msg;
-    setStatus(`Looking up: ${customer}`);
-
-    sendBackgroundMessage({ type: 'FIND_ROW', customerName: customer, vehicleName: vehicle })
-      .then((res) => {
-        if (res?.success && res.result) {
-          if (res.result.error) {
-            setStatus('Multiple matches');
-            showError(res.result.error);
-          } else {
-            currentRowIndex = res.result.rowIndex;
-            const rowData = res.result.rowData;
-            while (rowData.length < 15) rowData.push('');
-            setStatus(`Row ${currentRowIndex}`);
-            showFields(rowData);
-          }
-          return;
-        }
-
-        if (res?.error) {
-          setStatus('Lookup failed');
-          showError(res.error);
-          return;
-        }
-
-        showNoMatch();
-      });
+    console.log('[MessengerHat] THREAD_CHANGED:', msg);
+    lookupThread(msg);
   }
 });
 
-// Initial message
-setStatus('Waiting for Messenger...');
-console.log('[CRM] Side panel ready, listening for THREAD_CHANGED messages');
+function lookupThread(threadMsg) {
+  currentThreadId = threadMsg.threadId;
+  currentRowIndex = null;
+  showLoading();
+
+  const { customer, vehicle } = threadMsg;
+  setStatus(`Looking up: ${customer}`);
+
+  sendBackgroundMessage({ type: 'FIND_ROW', customerName: customer, vehicleName: vehicle })
+    .then((res) => {
+      if (res?.success && res.result) {
+        if (res.result.error) {
+          setStatus('Multiple matches');
+          showError(res.result.error);
+        } else {
+          currentRowIndex = res.result.rowIndex;
+          const rowData = res.result.rowData;
+          while (rowData.length < 15) rowData.push('');
+          setStatus(`Row ${currentRowIndex}`);
+          showFields(rowData);
+        }
+        return;
+      }
+
+      if (res?.error) {
+        setStatus('Lookup failed');
+        showError(res.error);
+        return;
+      }
+
+      showNoMatch();
+    });
+}
+
+// On panel load, request current thread context from background
+console.log('[MessengerHat] Side panel initializing');
+sendBackgroundMessage({ type: 'GET_THREAD_CONTEXT' })
+  .then((res) => {
+    if (res?.threadContext) {
+      console.log('[MessengerHat] Got thread context from background:', res.threadContext);
+      lookupThread(res.threadContext);
+    } else {
+      console.log('[MessengerHat] No thread context yet, waiting...');
+      setStatus('Open a Messenger conversation to get started');
+    }
+  });

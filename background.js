@@ -21,6 +21,7 @@ let cachedAccessToken = null;
 let tokenExpiresAt = 0;
 let cachedSheetData = null;
 let sheetDataExpiresAt = 0;
+let lastThreadContext = null;
 
 function invalidateSheetCache() {
   cachedSheetData = null;
@@ -36,33 +37,33 @@ function getSheetRange(cells) {
 async function findRow(customerName, vehicleName) {
   let rows = [];
   try {
-    console.log('[CRM] findRow called with:', { customerName, vehicleName });
+    console.log('[MessengerHat] findRow called with:', { customerName, vehicleName });
 
     // Check if we have cached sheet data that's still valid (5 min cache)
     if (cachedSheetData && Date.now() < sheetDataExpiresAt) {
-      console.log('[CRM] Using cached sheet data');
+      console.log('[MessengerHat] Using cached sheet data');
       rows = cachedSheetData;
     } else {
       const range = getSheetRange('A:O');
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`;
-      console.log('[CRM] Fetching fresh data from:', url.substring(0, 80) + '...');
+      console.log('[MessengerHat] Fetching fresh data from:', url.substring(0, 80) + '...');
 
       const res = await fetch(url);
-      console.log('[CRM] Fetch response status:', res.status);
+      console.log('[MessengerHat] Fetch response status:', res.status);
       const data = await res.json();
 
       if (!res.ok) {
         const message = data?.error?.message || `Sheet API request failed with status ${res.status}`;
-        console.error('[CRM] Sheet API error:', { status: res.status, range, message, details: data });
+        console.error('[MessengerHat] Sheet API error:', { status: res.status, range, message, details: data });
         throw new Error(message);
       }
       rows = data.values || [];
       cachedSheetData = rows;
       sheetDataExpiresAt = Date.now() + (5 * 60 * 1000); // Cache for 5 minutes
-      console.log('[CRM] Found', rows.length, 'rows in sheet, cached for 5 minutes');
+      console.log('[MessengerHat] Found', rows.length, 'rows in sheet, cached for 5 minutes');
     }
   } catch (err) {
-    console.error('[CRM] findRow error:', err);
+    console.error('[MessengerHat] findRow error:', err);
     throw err;
   }
 
@@ -83,7 +84,7 @@ async function findRow(customerName, vehicleName) {
     const vehicleMatches = vehicleMatch === '' || vehicle.includes(vehicleMatch);
 
     if (i < 5) {
-      console.log(`[CRM] Row ${i}: customer="${customer}" contains "${nameMatch}"? ${customerMatches}, vehicle="${vehicle}" contains "${vehicleMatch}"? ${vehicleMatches}`);
+      console.log(`[MessengerHat] Row ${i}: customer="${customer}" contains "${nameMatch}"? ${customerMatches}, vehicle="${vehicle}" contains "${vehicleMatch}"? ${vehicleMatches}`);
     }
 
     // Match: customer name AND vehicle
@@ -93,16 +94,16 @@ async function findRow(customerName, vehicleName) {
   }
 
   if (matches.length > 1) {
-    console.error(`[CRM] ERROR: Found ${matches.length} matching rows. Matches at rows: ${matches.map(m => m.rowIndex).join(', ')}`);
+    console.error(`[MessengerHat] ERROR: Found ${matches.length} matching rows. Matches at rows: ${matches.map(m => m.rowIndex).join(', ')}`);
     return { error: `Found ${matches.length} matching rows. Cannot determine which lead. Check rows: ${matches.map(m => m.rowIndex).join(', ')}` };
   }
 
   if (matches.length === 1) {
-    console.log(`[CRM] MATCH found at row ${matches[0].rowIndex}`);
+    console.log(`[MessengerHat] MATCH found at row ${matches[0].rowIndex}`);
     return { rowIndex: matches[0].rowIndex, rowData: matches[0].rowData };
   }
 
-  console.log('[CRM] No matching row found');
+  console.log('[MessengerHat] No matching row found');
   return null;
 }
 
@@ -162,7 +163,7 @@ async function createJWT() {
     const signatureEncoded = base64url(String.fromCharCode(...new Uint8Array(signature)));
     return `${message}.${signatureEncoded}`;
   } catch (err) {
-    console.error('[CRM] JWT creation failed:', err);
+    console.error('[MessengerHat] JWT creation failed:', err);
     throw err;
   }
 }
@@ -184,17 +185,17 @@ async function getAccessToken() {
 
     if (!res.ok) {
       const err = await res.json();
-      console.error('[CRM] Token exchange failed:', err);
+      console.error('[MessengerHat] Token exchange failed:', err);
       throw new Error('Failed to get access token');
     }
 
     const data = await res.json();
     cachedAccessToken = data.access_token;
     tokenExpiresAt = Date.now() + (data.expires_in * 1000);
-    console.log('[CRM] Got access token, expires in', data.expires_in, 'seconds');
+    console.log('[MessengerHat] Got access token, expires in', data.expires_in, 'seconds');
     return cachedAccessToken;
   } catch (err) {
-    console.error('[CRM] getAccessToken error:', err);
+    console.error('[MessengerHat] getAccessToken error:', err);
     throw err;
   }
 }
@@ -202,7 +203,7 @@ async function getAccessToken() {
 // Update specific columns in a row
 async function updateRow(rowIndex, updates) {
   try {
-    console.log('[CRM] updateRow called with:', { rowIndex, updates });
+    console.log('[MessengerHat] updateRow called with:', { rowIndex, updates });
     const token = await getAccessToken();
 
     // Update each column individually to avoid any mapping issues
@@ -222,19 +223,19 @@ async function updateRow(rowIndex, updates) {
 
       if (!res.ok) {
         const err = await res.json();
-        console.error(`[CRM] Failed to update ${col}${rowIndex}:`, err);
+        console.error(`[MessengerHat] Failed to update ${col}${rowIndex}:`, err);
         throw new Error(`Failed to update ${col}: ${err.error?.message || 'Unknown error'}`);
       }
 
-      console.log(`[CRM] Updated ${col}${rowIndex}`);
+      console.log(`[MessengerHat] Updated ${col}${rowIndex}`);
     }
 
     invalidateSheetCache();
-    console.log('[CRM] Cleared cached sheet data after write');
-    console.log('[CRM] Row updated successfully');
+    console.log('[MessengerHat] Cleared cached sheet data after write');
+    console.log('[MessengerHat] Row updated successfully');
     return { success: true };
   } catch (err) {
-    console.error('[CRM] updateRow error:', err);
+    console.error('[MessengerHat] updateRow error:', err);
     throw err;
   }
 }
@@ -242,21 +243,19 @@ async function updateRow(rowIndex, updates) {
 // Message handler from content script and side panel
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === 'THREAD_CHANGED') {
-    console.log('[CRM] THREAD_CHANGED from content script:', msg);
+    console.log('[MessengerHat] THREAD_CHANGED from content script:', msg);
+    // Store the thread context for the side panel to retrieve
+    lastThreadContext = msg;
     // Open side panel for this window
     if (sender.tab?.windowId) {
-      chrome.sidePanel.open({ windowId: sender.tab.windowId }, () => {
-        // Forward the message to the side panel
-        chrome.runtime.sendMessage(
-          { type: 'THREAD_CHANGED', ...msg },
-          (response) => {
-            if (chrome.runtime?.lastError) {
-              console.error('[CRM] Failed to forward to side panel:', chrome.runtime.lastError);
-            }
-          }
-        );
-      });
+      chrome.sidePanel.open({ windowId: sender.tab.windowId });
     }
+    return true;
+  }
+
+  if (msg.type === 'GET_THREAD_CONTEXT') {
+    console.log('[MessengerHat] Side panel requesting thread context');
+    sendResponse({ threadContext: lastThreadContext });
     return true;
   }
 

@@ -73,13 +73,13 @@ function lookupCurrentThread() {
 
   const threadName = getCurrentThreadName();
   if (!threadName) {
-    console.log('[CRM] No thread name found, retrying...');
+    console.log('[MessengerHat] No thread name found, retrying...');
     setTimeout(() => lookupCurrentThread(), 500);
     return;
   }
 
   const { customer, vehicle } = parseThreadName(threadName);
-  console.log('[CRM] Thread changed:', { customer, vehicle, threadId });
+  console.log('[MessengerHat] Thread changed:', { customer, vehicle, threadId });
 
   // Notify background to open side panel and forward thread info
   chrome.runtime.sendMessage({
@@ -90,7 +90,7 @@ function lookupCurrentThread() {
     vehicle
   }, (response) => {
     if (chrome.runtime?.lastError) {
-      console.error('[CRM] Failed to send THREAD_CHANGED:', chrome.runtime.lastError);
+      console.error('[MessengerHat] Failed to send THREAD_CHANGED:', chrome.runtime.lastError);
     }
   });
 }
@@ -133,7 +133,7 @@ function checkInbound(newThreads) {
 
     // If it was sentByYou before and now it's not — they replied
     if (prev.sentByYou && !thread.sentByYou) {
-      console.log(`[CRM] Inbound from ${thread.name}: ${thread.lastMsg}`);
+      console.log(`[MessengerHat] Inbound from ${thread.name}: ${thread.lastMsg}`);
       notifyBackend(thread);
     }
   });
@@ -210,6 +210,6 @@ observer.observe(document.body, { subtree: true, childList: true });
 waitForConversation(() => {
   const threads = parseThreads();
   lastThreads = threads;
-  console.log('[CRM] Initial thread scan:', threads.length, 'threads');
+  console.log('[MessengerHat] Initial thread scan:', threads.length, 'threads');
   lookupCurrentThread();
 });
