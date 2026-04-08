@@ -90,7 +90,9 @@ function lookupCurrentThread() {
     vehicle
   }, (response) => {
     if (chrome.runtime?.lastError) {
-      console.error('[MessengerHat] Failed to send THREAD_CHANGED:', chrome.runtime.lastError);
+      console.error('[MessengerHat] Failed to send THREAD_CHANGED:', chrome.runtime.lastError.message);
+    } else {
+      console.log('[MessengerHat] THREAD_CHANGED sent to background');
     }
   });
 }
