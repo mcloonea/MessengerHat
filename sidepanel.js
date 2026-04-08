@@ -50,48 +50,23 @@ function renderFields(rowData) {
   fieldsEl.innerHTML = '';
   fieldsEl.style.display = 'flex';
   fieldsEl.style.flexDirection = 'column';
-  fieldsEl.style.gap = '8px';
+  fieldsEl.style.gap = '0';
   pendingChanges = {};
 
-  // Fields to exclude: Handler (A), Source (E), Customer (F), Vehicle (H)
-  const excludeKeys = ['handler', 'source', 'customer', 'vehicle'];
-  const displayCols = COLUMNS.filter(col => !excludeKeys.includes(col.key));
-
-  // Separate notes from other fields
-  const noteCol = displayCols.find(col => col.key === 'notes');
-  const mainCols = displayCols.filter(col => col.key !== 'notes');
-
-  // Render main fields in a flexible row
-  const mainRow = document.createElement('div');
-  mainRow.style.display = 'flex';
-  mainRow.style.flexWrap = 'nowrap';
-  mainRow.style.gap = '4px';
-
-  mainCols.forEach((col, i) => {
+  // Render ALL columns in their own rows (no exclusions)
+  COLUMNS.forEach((col) => {
     const colIndex = COLUMNS.indexOf(col);
     const value = (rowData[colIndex] || '').toString().trim();
 
-    const fieldWrapper = document.createElement('div');
-    fieldWrapper.style.display = 'flex';
-    fieldWrapper.style.flexDirection = 'column';
-    fieldWrapper.style.gap = '2px';
-    fieldWrapper.style.minWidth = '0';
-    // Proportional flex: Stage (3x), VIN (2x), others (1x)
-    if (col.key === 'stage') {
-      fieldWrapper.style.flex = '3 1 0';
-    } else if (col.key === 'vin') {
-      fieldWrapper.style.flex = '2 1 0';
-    } else {
-      fieldWrapper.style.flex = '1 1 0';
-    }
+    const fieldRow = document.createElement('div');
+    fieldRow.className = 'crm-field-row';
 
-    const label = document.createElement('label');
-    label.className = 'crm-label';
-    label.style.fontSize = '10px';
-    label.style.fontWeight = 'bold';
-    label.style.lineHeight = '1';
-    label.style.marginBottom = '2px';
+    const label = document.createElement('div');
+    label.className = 'crm-field-label';
     label.textContent = col.label;
+
+    const inputWrapper = document.createElement('div');
+    inputWrapper.className = 'crm-field-input-wrapper';
 
     let input;
 
@@ -99,14 +74,9 @@ function renderFields(rowData) {
       input = document.createElement('span');
       input.className = 'crm-value-static';
       input.textContent = value || '—';
-      input.style.fontSize = '12px';
     } else if (col.type === 'select') {
       input = document.createElement('select');
       input.className = 'crm-input crm-select';
-      input.style.fontSize = '12px';
-      input.style.width = '100%';
-      input.style.padding = '2px 4px';
-      input.style.textAlign = 'center';
       col.options.forEach(opt => {
         const o = document.createElement('option');
         o.value = opt;
@@ -130,16 +100,9 @@ function renderFields(rowData) {
       input = document.createElement('textarea');
       input.className = 'crm-input crm-textarea';
       input.value = value;
-      input.style.width = '100%';
-      input.style.fontSize = '12px';
-      input.style.padding = '2px 4px';
-      input.style.resize = 'vertical';
-      input.style.overflowWrap = 'break-word';
-      input.style.wordWrap = 'break-word';
-      input.style.overflow = 'hidden';
       const adjustHeight = () => {
         input.style.height = 'auto';
-        const newHeight = Math.max(input.scrollHeight, 22);
+        const newHeight = Math.max(input.scrollHeight, 80);
         input.style.height = newHeight + 'px';
       };
       input.addEventListener('input', () => {
@@ -154,12 +117,6 @@ function renderFields(rowData) {
       input.type = 'text';
       input.className = 'crm-input';
       input.value = value;
-      input.style.fontSize = '12px';
-      input.style.overflow = 'hidden';
-      input.style.textOverflow = 'ellipsis';
-      input.style.width = '100%';
-      input.style.padding = '2px 4px';
-      input.style.textAlign = 'center';
       input.addEventListener('input', () => {
         pendingChanges[col.col] = input.value;
         triggerAutoSave();
@@ -167,59 +124,11 @@ function renderFields(rowData) {
       });
     }
 
-    fieldWrapper.appendChild(label);
-    fieldWrapper.appendChild(input);
-    mainRow.appendChild(fieldWrapper);
+    inputWrapper.appendChild(input);
+    fieldRow.appendChild(label);
+    fieldRow.appendChild(inputWrapper);
+    fieldsEl.appendChild(fieldRow);
   });
-
-  fieldsEl.appendChild(mainRow);
-
-  // Render notes field full width below
-  if (noteCol) {
-    const colIndex = COLUMNS.indexOf(noteCol);
-    const value = (rowData[colIndex] || '').toString().trim();
-
-    const notesWrapper = document.createElement('div');
-    notesWrapper.style.display = 'flex';
-    notesWrapper.style.flexDirection = 'column';
-    notesWrapper.style.gap = '2px';
-
-    const label = document.createElement('label');
-    label.className = 'crm-label';
-    label.style.fontSize = '10px';
-    label.style.fontWeight = 'bold';
-    label.style.lineHeight = '1';
-    label.style.marginBottom = '2px';
-    label.textContent = noteCol.label;
-
-    const textarea = document.createElement('textarea');
-    textarea.className = 'crm-input crm-textarea';
-    textarea.value = value;
-    textarea.rows = 1;
-    textarea.style.width = '100%';
-    textarea.style.fontSize = '12px';
-    textarea.style.padding = '2px 4px';
-    textarea.style.resize = 'vertical';
-    textarea.style.overflowWrap = 'break-word';
-    textarea.style.wordWrap = 'break-word';
-    textarea.style.overflow = 'hidden';
-    const adjustHeight = () => {
-      textarea.style.height = 'auto';
-      const newHeight = Math.max(textarea.scrollHeight, 22);
-      textarea.style.height = Math.min(newHeight, 200) + 'px';
-    };
-    textarea.addEventListener('input', () => {
-      pendingChanges[noteCol.col] = textarea.value;
-      adjustHeight();
-      triggerAutoSave();
-      updateSaveButtonState();
-    });
-    setTimeout(adjustHeight, 0);
-
-    notesWrapper.appendChild(label);
-    notesWrapper.appendChild(textarea);
-    fieldsEl.appendChild(notesWrapper);
-  }
 
   // Save button handler
   const saveBtn = document.getElementById('crm-save-btn-header');
