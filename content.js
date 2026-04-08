@@ -201,7 +201,6 @@ const observer = new MutationObserver(() => {
     const threads = parseThreads();
     if (threads.length > 0) {
       checkInbound(threads);
-      console.table(threads);
     }
   }, 800);
 });
