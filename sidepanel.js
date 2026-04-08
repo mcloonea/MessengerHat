@@ -73,18 +73,16 @@ function renderFields(rowData) {
     fieldsEl.appendChild(sectionHeader);
   };
 
-  // Render ALL columns EXCEPT vehicle, source, handler, customer, condition, notes
+  // Render ALL columns EXCEPT vehicle, source, handler, customer, condition, notes, pricing
   COLUMNS.forEach((col, idx) => {
-    // Skip: vehicle (top bar), source (not needed), handler (shown as customer name), customer (shown at top), condition/notes (separate section)
-    if (col.key === 'vehicle' || col.key === 'source' || col.key === 'handler' || col.key === 'customer' || notesFields.includes(col.key)) return;
+    // Skip: vehicle (top bar), source (not needed), handler (shown as customer name), customer (shown at top), condition/notes (separate section), pricing (grid section)
+    if (col.key === 'vehicle' || col.key === 'source' || col.key === 'handler' || col.key === 'customer' || notesFields.includes(col.key) || pricingFields.includes(col.key)) return;
 
     // Add section headers
     if (stageFields.includes(col.key) && (idx === 0 || !stageFields.includes(COLUMNS[idx - 1]?.key))) {
       addSectionHeader('Stage');
     } else if (vehicleFields.includes(col.key) && (idx === 0 || !vehicleFields.includes(COLUMNS[idx - 1]?.key))) {
       addSectionHeader('Vehicle');
-    } else if (pricingFields.includes(col.key) && (idx === 0 || !pricingFields.includes(COLUMNS[idx - 1]?.key))) {
-      addSectionHeader('Pricing');
     }
 
     const colIndex = COLUMNS.indexOf(col);
@@ -162,7 +160,49 @@ function renderFields(rowData) {
     fieldsEl.appendChild(fieldRow);
   });
 
-  // Notes section with Condition and Notes side by side
+  // Pricing section with 2-column grid
+  const pricingCols = COLUMNS.filter(c => pricingFields.includes(c.key));
+  if (pricingCols.length > 0) {
+    addSectionHeader('Pricing');
+
+    const pricingGrid = document.createElement('div');
+    pricingGrid.style.cssText = `
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 4px;
+    `;
+
+    pricingCols.forEach(col => {
+      const colIndex = COLUMNS.indexOf(col);
+      const value = (rowData[colIndex] || '').toString().trim();
+
+      const fieldWrapper = document.createElement('div');
+      fieldWrapper.style.cssText = `display: flex; flex-direction: column; gap: 4px;`;
+
+      const label = document.createElement('div');
+      label.className = 'crm-field-label';
+      label.textContent = col.label;
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'crm-input';
+      input.value = value;
+      input.addEventListener('input', () => {
+        pendingChanges[col.col] = input.value;
+        triggerAutoSave();
+        updateSaveButtonState();
+      });
+
+      fieldWrapper.appendChild(label);
+      fieldWrapper.appendChild(input);
+      pricingGrid.appendChild(fieldWrapper);
+    });
+
+    fieldsEl.appendChild(pricingGrid);
+  }
+
+  // Notes section with Condition and Notes
   const conditionCol = COLUMNS.find(c => c.key === 'condition');
   const notesCol = COLUMNS.find(c => c.key === 'notes');
 
@@ -203,10 +243,10 @@ function renderFields(rowData) {
       const condInput = document.createElement('textarea');
       condInput.className = 'crm-input crm-textarea';
       condInput.value = conditionValue;
-      condInput.style.minHeight = '28px';
+      condInput.style.minHeight = '44px';
       const adjustCondHeight = () => {
         condInput.style.height = 'auto';
-        const newHeight = Math.max(condInput.scrollHeight, 28);
+        const newHeight = Math.max(condInput.scrollHeight, 44);
         condInput.style.height = newHeight + 'px';
       };
       condInput.addEventListener('input', () => {
@@ -237,10 +277,10 @@ function renderFields(rowData) {
       const notesInput = document.createElement('textarea');
       notesInput.className = 'crm-input crm-textarea';
       notesInput.value = notesValue;
-      notesInput.style.minHeight = '60px';
+      notesInput.style.minHeight = '44px';
       const adjustHeight = () => {
         notesInput.style.height = 'auto';
-        const newHeight = Math.max(notesInput.scrollHeight, 60);
+        const newHeight = Math.max(notesInput.scrollHeight, 44);
         notesInput.style.height = newHeight + 'px';
       };
       notesInput.addEventListener('input', () => {
