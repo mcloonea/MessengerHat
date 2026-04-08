@@ -4,11 +4,13 @@ body {
   margin: 0;
   padding: 0;
   background: #ffffff;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  font-size: 13px;
   color: #1a1a1a;
   width: 100%;
   height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #crm-panel {
@@ -22,24 +24,25 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 12px;
-  background: #f5f5f5;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 10px 12px;
+  background: #fafafa;
+  border-bottom: 1px solid #efefef;
   cursor: default;
   flex-shrink: 0;
 }
 
 .crm-title {
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   color: #1a1a1a;
+  text-transform: uppercase;
 }
 
 .crm-status {
   flex: 1;
-  font-size: 13px;
-  color: #666;
+  font-size: 11px;
+  color: #888;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -81,7 +84,7 @@ body {
 .crm-body {
   flex: 1;
   overflow-y: auto;
-  padding: 10px 12px;
+  padding: 8px 10px;
 }
 
 .crm-loading {
@@ -95,8 +98,8 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 0;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 5px 0;
+  border-bottom: 1px solid #f5f5f5;
 }
 
 .crm-field-row:last-child {
@@ -104,13 +107,13 @@ body {
 }
 
 .crm-field-label {
-  flex: 0 0 110px;
-  font-size: 12px;
-  font-weight: 700;
+  flex: 0 0 100px;
+  font-size: 11px;
+  font-weight: 600;
   text-transform: uppercase;
-  color: #555;
-  letter-spacing: 0.04em;
-  line-height: 1.2;
+  color: #888;
+  letter-spacing: 0.03em;
+  line-height: 1.3;
 }
 
 .crm-field-input-wrapper {
@@ -137,22 +140,23 @@ body {
 
 .crm-input {
   background: #ffffff;
-  border: 1px solid #d0d0d0;
-  border-radius: 3px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
   color: #1a1a1a;
-  font-size: 13px;
-  padding: 5px 8px;
+  font-size: 12px;
+  padding: 5px 7px;
   outline: none;
   font-family: inherit;
   box-sizing: border-box;
   width: 100%;
   min-height: 28px;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .crm-input:focus {
   border-color: #0066cc;
-  background: #f9f9f9;
-  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.08);
 }
 
 .crm-textarea {
