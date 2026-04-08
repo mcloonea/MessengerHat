@@ -277,7 +277,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sidePanelTabId = null;
       });
     }
-    return true;
+    sendResponse({ success: true });
+    return false;
   }
 
   if (msg.type === 'GET_THREAD_CONTEXT') {
