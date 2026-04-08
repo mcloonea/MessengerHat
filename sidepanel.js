@@ -56,21 +56,19 @@ function renderFields(rowData) {
   // Pricing section fields
   const pricingFields = ['initial', 'counter', 'andrew', 'kevin', 'mmr'];
 
-  // Render ALL columns EXCEPT vehicle and source in their own rows
+  // Render ALL columns EXCEPT vehicle, source, and handler in their own rows
   COLUMNS.forEach((col, idx) => {
-    // Skip vehicle and source - vehicle shown in top bar, source not needed for Messenger
-    if (col.key === 'vehicle' || col.key === 'source') return;
+    // Skip vehicle (top bar), source (not needed), handler (shown as customer name in top)
+    if (col.key === 'vehicle' || col.key === 'source' || col.key === 'handler') return;
 
     // Add pricing section header before first pricing field
     if (pricingFields.includes(col.key) && (idx === 0 || !pricingFields.includes(COLUMNS[idx - 1]?.key))) {
       const sectionHeader = document.createElement('div');
       sectionHeader.style.cssText = `
-        padding: 10px 0 6px 0;
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: #888;
-        letter-spacing: 0.03em;
+        padding: 10px 0 8px 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #1a1a1a;
         border-top: 1px solid #e0e0e0;
         margin-top: 4px;
       `;
