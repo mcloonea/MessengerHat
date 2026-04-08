@@ -250,8 +250,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (sender.tab?.windowId) {
       console.log('[MessengerHat] Opening side panel for windowId:', sender.tab.windowId);
       chrome.sidePanel.open({ windowId: sender.tab.windowId }, (result) => {
-        if (chrome.runtime?.lastError) {
-          console.error('[MessengerHat] Error opening side panel:', chrome.runtime.lastError);
+        const error = chrome.runtime?.lastError;
+        if (error) {
+          console.error('[MessengerHat] Error opening side panel:', error.message || JSON.stringify(error));
         } else {
           console.log('[MessengerHat] Side panel opened successfully');
         }
