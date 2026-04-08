@@ -300,11 +300,11 @@ function lookupThread(threadMsg) {
           const rowData = res.result.rowData;
           while (rowData.length < 15) rowData.push('');
 
-          // Populate top bar
+          // Populate top bar (2 rows)
           document.getElementById('crm-customer').textContent = customer || '—';
           document.getElementById('crm-customer').title = customer;
-          document.getElementById('crm-vehicle-center').textContent = vehicle || '—';
-          document.getElementById('crm-vehicle-center').title = vehicle;
+          document.getElementById('crm-vehicle').textContent = vehicle || '—';
+          document.getElementById('crm-vehicle').title = vehicle;
           document.getElementById('crm-row-number').textContent = `Row ${currentRowIndex}`;
 
           setStatus('');
