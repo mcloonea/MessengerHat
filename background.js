@@ -1,3 +1,4 @@
+// ✓ Checkpoint: Last working version before chrome sidepanel implementation
 // background.js - Handles Google Sheets API access
 
 const SHEET_ID = '1HAOKyXof_UqWnkzg6ja_0QAxVkFUaGI8_LB66JJ-rGM';
