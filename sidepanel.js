@@ -53,33 +53,10 @@ function renderFields(rowData) {
   fieldsEl.style.gap = '0';
   pendingChanges = {};
 
-  // Vehicle header at top (without label, just the value)
-  const vehicleCol = COLUMNS.find(c => c.key === 'vehicle');
-  if (vehicleCol) {
-    const vehicleIdx = COLUMNS.indexOf(vehicleCol);
-    const vehicleValue = (rowData[vehicleIdx] || '').toString().trim();
-
-    const vehicleHeader = document.createElement('div');
-    vehicleHeader.style.cssText = `
-      padding: 10px 0 8px 0;
-      border-bottom: 1px solid #e0e0e0;
-      font-size: 13px;
-      font-weight: 500;
-      color: #1a1a1a;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-bottom: 4px;
-    `;
-    vehicleHeader.textContent = vehicleValue || '—';
-    vehicleHeader.title = vehicleValue; // Show full text on hover
-    fieldsEl.appendChild(vehicleHeader);
-  }
-
-  // Render ALL columns EXCEPT vehicle in their own rows
+  // Render ALL columns EXCEPT vehicle and source in their own rows
   COLUMNS.forEach((col) => {
-    // Skip vehicle - already shown in header
-    if (col.key === 'vehicle') return;
+    // Skip vehicle and source - vehicle shown in top bar, source not needed for Messenger
+    if (col.key === 'vehicle' || col.key === 'source') return;
 
     const colIndex = COLUMNS.indexOf(col);
     const value = (rowData[colIndex] || '').toString().trim();
@@ -322,7 +299,15 @@ function lookupThread(threadMsg) {
           currentRowIndex = res.result.rowIndex;
           const rowData = res.result.rowData;
           while (rowData.length < 15) rowData.push('');
-          setStatus(`Row ${currentRowIndex}`);
+
+          // Populate top bar
+          document.getElementById('crm-customer').textContent = customer || '—';
+          document.getElementById('crm-customer').title = customer;
+          document.getElementById('crm-vehicle-center').textContent = vehicle || '—';
+          document.getElementById('crm-vehicle-center').title = vehicle;
+          document.getElementById('crm-row-number').textContent = `Row ${currentRowIndex}`;
+
+          setStatus('');
           showFields(rowData);
         }
         return;

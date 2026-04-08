@@ -20,32 +20,43 @@ body {
   background: #ffffff;
 }
 
-.crm-header {
+.crm-top-bar {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
   padding: 10px 12px;
   background: #fafafa;
   border-bottom: 1px solid #efefef;
-  cursor: default;
+  gap: 8px;
   flex-shrink: 0;
 }
 
-.crm-title {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  color: #1a1a1a;
-  text-transform: uppercase;
-}
-
-.crm-status {
+.crm-customer {
   flex: 1;
-  font-size: 11px;
-  color: #888;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1a1a;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.crm-vehicle-center {
+  flex: 1;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.crm-row-number {
+  flex: 0 0 auto;
+  font-size: 12px;
+  color: #888;
+  font-weight: 500;
 }
 
 .crm-save-header {
