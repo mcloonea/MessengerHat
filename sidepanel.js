@@ -168,48 +168,56 @@ function renderFields(rowData) {
     notesHeader.textContent = 'Notes';
     fieldsEl.appendChild(notesHeader);
 
-    // Create side-by-side container
+    // Create vertical container for Condition and Notes
     const notesContainer = document.createElement('div');
     notesContainer.style.cssText = `
       display: flex;
+      flex-direction: column;
       gap: 8px;
       margin-bottom: 4px;
     `;
 
-    // Condition field (left)
+    // Condition field (top, textarea with auto-expand)
     if (conditionCol) {
       const conditionIdx = COLUMNS.indexOf(conditionCol);
       const conditionValue = (rowData[conditionIdx] || '').toString().trim();
 
       const conditionWrapper = document.createElement('div');
-      conditionWrapper.style.cssText = `flex: 1; min-width: 0;`;
+      conditionWrapper.style.cssText = ``;
 
       const condLabel = document.createElement('div');
       condLabel.className = 'crm-field-label';
       condLabel.textContent = 'Condition';
 
-      const condInput = document.createElement('input');
-      condInput.type = 'text';
-      condInput.className = 'crm-input';
+      const condInput = document.createElement('textarea');
+      condInput.className = 'crm-input crm-textarea';
       condInput.value = conditionValue;
+      condInput.style.minHeight = '28px';
+      const adjustCondHeight = () => {
+        condInput.style.height = 'auto';
+        const newHeight = Math.max(condInput.scrollHeight, 28);
+        condInput.style.height = newHeight + 'px';
+      };
       condInput.addEventListener('input', () => {
         pendingChanges['J'] = condInput.value;
+        adjustCondHeight();
         triggerAutoSave();
         updateSaveButtonState();
       });
+      setTimeout(adjustCondHeight, 0);
 
       conditionWrapper.appendChild(condLabel);
       conditionWrapper.appendChild(condInput);
       notesContainer.appendChild(conditionWrapper);
     }
 
-    // Notes field (right)
+    // Notes field (bottom, textarea)
     if (notesCol) {
       const notesIdx = COLUMNS.indexOf(notesCol);
       const notesValue = (rowData[notesIdx] || '').toString().trim();
 
       const notesWrapper = document.createElement('div');
-      notesWrapper.style.cssText = `flex: 1; min-width: 0;`;
+      notesWrapper.style.cssText = ``;
 
       const notesLabel = document.createElement('div');
       notesLabel.className = 'crm-field-label';
