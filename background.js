@@ -251,16 +251,19 @@ chrome.action.onClicked.addListener((tab) => {
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === 'PANEL_READY') {
     // Side panel has opened and is ready
-    console.log('[MessengerHat] Side panel opened on tab:', sender.tab.id);
-    sidePanelTabId = sender.tab.id;
-    // Send current thread context if we have it
-    if (lastThreadContext) {
-      chrome.tabs.sendMessage(sender.tab.id, {
-        type: 'THREAD_CHANGED',
-        ...lastThreadContext
-      }).catch(err => console.log('[MessengerHat] Could not send to side panel (may not be loaded yet)'));
+    if (sender.tab?.id) {
+      console.log('[MessengerHat] Side panel opened on tab:', sender.tab.id);
+      sidePanelTabId = sender.tab.id;
+      // Send current thread context if we have it
+      if (lastThreadContext) {
+        chrome.tabs.sendMessage(sender.tab.id, {
+          type: 'THREAD_CHANGED',
+          ...lastThreadContext
+        }).catch(err => console.log('[MessengerHat] Could not send to side panel (may not be loaded yet)'));
+      }
     }
-    return true;
+    sendResponse({ success: true });
+    return false;
   }
 
   if (msg.type === 'THREAD_CHANGED') {
