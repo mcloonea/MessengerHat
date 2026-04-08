@@ -53,8 +53,34 @@ function renderFields(rowData) {
   fieldsEl.style.gap = '0';
   pendingChanges = {};
 
-  // Render ALL columns in their own rows (no exclusions)
+  // Vehicle header at top (without label, just the value)
+  const vehicleCol = COLUMNS.find(c => c.key === 'vehicle');
+  if (vehicleCol) {
+    const vehicleIdx = COLUMNS.indexOf(vehicleCol);
+    const vehicleValue = (rowData[vehicleIdx] || '').toString().trim();
+
+    const vehicleHeader = document.createElement('div');
+    vehicleHeader.style.cssText = `
+      padding: 10px 0 8px 0;
+      border-bottom: 1px solid #e0e0e0;
+      font-size: 13px;
+      font-weight: 500;
+      color: #1a1a1a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 4px;
+    `;
+    vehicleHeader.textContent = vehicleValue || '—';
+    vehicleHeader.title = vehicleValue; // Show full text on hover
+    fieldsEl.appendChild(vehicleHeader);
+  }
+
+  // Render ALL columns EXCEPT vehicle in their own rows
   COLUMNS.forEach((col) => {
+    // Skip vehicle - already shown in header
+    if (col.key === 'vehicle') return;
+
     const colIndex = COLUMNS.indexOf(col);
     const value = (rowData[colIndex] || '').toString().trim();
 
