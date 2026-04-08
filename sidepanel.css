@@ -21,8 +21,8 @@ body {
 .crm-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
+  gap: 10px;
+  padding: 8px 12px;
   background: #f5f5f5;
   border-bottom: 1px solid #e0e0e0;
   cursor: default;
@@ -81,7 +81,7 @@ body {
 .crm-body {
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
+  padding: 10px 12px;
 }
 
 .crm-loading {
@@ -93,9 +93,9 @@ body {
 /* Field container - each field gets its own row */
 .crm-field-row {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px 0;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
   border-bottom: 1px solid #f0f0f0;
 }
 
@@ -104,14 +104,13 @@ body {
 }
 
 .crm-field-label {
-  flex: 0 0 140px;
-  font-size: 13px;
-  font-weight: 600;
+  flex: 0 0 110px;
+  font-size: 12px;
+  font-weight: 700;
   text-transform: uppercase;
-  color: #666;
-  letter-spacing: 0.05em;
-  padding-top: 8px;
-  line-height: 1.4;
+  color: #555;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
 }
 
 .crm-field-input-wrapper {
@@ -139,27 +138,27 @@ body {
 .crm-input {
   background: #ffffff;
   border: 1px solid #d0d0d0;
-  border-radius: 4px;
+  border-radius: 3px;
   color: #1a1a1a;
-  font-size: 14px;
-  padding: 8px 10px;
+  font-size: 13px;
+  padding: 5px 8px;
   outline: none;
   font-family: inherit;
   box-sizing: border-box;
   width: 100%;
-  min-height: 32px;
+  min-height: 28px;
 }
 
 .crm-input:focus {
   border-color: #0066cc;
   background: #f9f9f9;
-  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
 }
 
 .crm-textarea {
   resize: vertical;
   width: 100%;
-  min-height: 80px;
+  min-height: 60px;
   font-family: inherit;
 }
 
