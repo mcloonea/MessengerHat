@@ -248,7 +248,16 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     lastThreadContext = msg;
     // Open side panel for this window
     if (sender.tab?.windowId) {
-      chrome.sidePanel.open({ windowId: sender.tab.windowId });
+      console.log('[MessengerHat] Opening side panel for windowId:', sender.tab.windowId);
+      chrome.sidePanel.open({ windowId: sender.tab.windowId }, (result) => {
+        if (chrome.runtime?.lastError) {
+          console.error('[MessengerHat] Error opening side panel:', chrome.runtime.lastError);
+        } else {
+          console.log('[MessengerHat] Side panel opened successfully');
+        }
+      });
+    } else {
+      console.error('[MessengerHat] No windowId available');
     }
     return true;
   }
