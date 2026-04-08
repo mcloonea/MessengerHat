@@ -22,6 +22,7 @@ let tokenExpiresAt = 0;
 let cachedSheetData = null;
 let sheetDataExpiresAt = 0;
 let lastThreadContext = null;
+let sidePanelTabId = null; // Track which tab has the side panel open
 
 function invalidateSheetCache() {
   cachedSheetData = null;
@@ -240,25 +241,41 @@ async function updateRow(rowIndex, updates) {
   }
 }
 
+// Handle extension icon click - open the side panel
+chrome.action.onClicked.addListener((tab) => {
+  console.log('[MessengerHat] Extension icon clicked, opening side panel');
+  chrome.sidePanel.open({ windowId: tab.windowId });
+});
+
 // Message handler from content script and side panel
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg.type === 'PANEL_READY') {
+    // Side panel has opened and is ready
+    console.log('[MessengerHat] Side panel opened on tab:', sender.tab.id);
+    sidePanelTabId = sender.tab.id;
+    // Send current thread context if we have it
+    if (lastThreadContext) {
+      chrome.tabs.sendMessage(sender.tab.id, {
+        type: 'THREAD_CHANGED',
+        ...lastThreadContext
+      }).catch(err => console.log('[MessengerHat] Could not send to side panel (may not be loaded yet)'));
+    }
+    return true;
+  }
+
   if (msg.type === 'THREAD_CHANGED') {
     console.log('[MessengerHat] THREAD_CHANGED from content script:', msg);
     // Store the thread context for the side panel to retrieve
     lastThreadContext = msg;
-    // Open side panel for this window
-    if (sender.tab?.windowId) {
-      console.log('[MessengerHat] Opening side panel for windowId:', sender.tab.windowId);
-      chrome.sidePanel.open({ windowId: sender.tab.windowId }, (result) => {
-        const error = chrome.runtime?.lastError;
-        if (error) {
-          console.error('[MessengerHat] Error opening side panel:', error.message || JSON.stringify(error));
-        } else {
-          console.log('[MessengerHat] Side panel opened successfully');
-        }
+    // Send to side panel if it's open
+    if (sidePanelTabId) {
+      chrome.tabs.sendMessage(sidePanelTabId, {
+        type: 'THREAD_CHANGED',
+        ...msg
+      }).catch(err => {
+        console.log('[MessengerHat] Side panel not responding, will update when it requests');
+        sidePanelTabId = null;
       });
-    } else {
-      console.error('[MessengerHat] No windowId available');
     }
     return true;
   }

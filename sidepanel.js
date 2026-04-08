@@ -403,8 +403,17 @@ function lookupThread(threadMsg) {
     });
 }
 
-// On panel load, request current thread context from background
+// On panel load, announce to background and request thread context
 console.log('[MessengerHat] Side panel initializing');
+
+// Tell background the side panel is open
+chrome.runtime.sendMessage({ type: 'PANEL_READY' }, (response) => {
+  if (chrome.runtime?.lastError) {
+    console.error('[MessengerHat] Could not notify background:', chrome.runtime.lastError.message);
+  }
+});
+
+// Request current thread context if one exists
 sendBackgroundMessage({ type: 'GET_THREAD_CONTEXT' })
   .then((res) => {
     if (res?.threadContext) {
